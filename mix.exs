@@ -1,0 +1,80 @@
+defmodule AppRecorder.MixProject do
+  use Mix.Project
+
+  @source_url "https://github.com/annatel/app_recorder"
+  @version "0.1.0"
+
+  def project do
+    [
+      app: :app_recorder,
+      version: @version,
+      elixir: "~> 1.11",
+      start_permanent: Mix.env() == :prod,
+      deps: deps(),
+      description: description(),
+      package: package(),
+      docs: docs(),
+      elixirc_paths: elixirc_paths(Mix.env()),
+      test_coverage: test_coverage(),
+      aliases: aliases()
+    ]
+  end
+
+  def application do
+    [
+      extra_applications: [:logger]
+    ]
+  end
+
+  defp deps do
+    [
+      {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
+      {:ecto_sql, "~> 3.6"},
+      {:myxql, "~> 0.4.0"},
+      {:shortcode, "~> 0.5.0"},
+      {:antl_utils_ecto, "~> 1.3.0"},
+      {:jason, "~> 1.2"}
+    ]
+  end
+
+  defp elixirc_paths(:test), do: ["lib", "test/support"]
+  defp elixirc_paths(_), do: ["lib"]
+
+  defp test_coverage() do
+    [
+      ignore_modules: [AppRecorder.Migrations, AppRecorder.Migrations.V1]
+    ]
+  end
+
+  defp aliases do
+    [
+      test: ["ecto.setup", "test"],
+      "ecto.setup": [
+        "ecto.create --quiet -r AppRecorder.TestRepo",
+        "ecto.migrate -r AppRecorder.TestRepo"
+      ],
+      "ecto.reset": ["ecto.drop -r AppRecorder.TestRepo", "ecto.setup"]
+    ]
+  end
+
+  defp description() do
+    "Record events"
+  end
+
+  defp package() do
+    [
+      licenses: ["MIT"],
+      links: %{"GitHub" => @source_url}
+    ]
+  end
+
+  defp docs do
+    [
+      main: "readme",
+      source_url: @source_url,
+      extras: [
+        "README.md"
+      ]
+    ]
+  end
+end
