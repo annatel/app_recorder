@@ -10,7 +10,7 @@ defmodule AppRecorder.Factory.Event do
           owner_id: uuid(),
           request_id: "request_id_#{System.unique_integer([:positive])}",
           resource_id: "resource_id_#{System.unique_integer()}",
-          resource_type: "resource_type_#{System.unique_integer()}",
+          resource_object: "resource_object_#{System.unique_integer()}",
           sequence: System.unique_integer([:positive]),
           type: "type_#{System.unique_integer()}"
         }

@@ -12,7 +12,7 @@ defmodule AppRecorder.Events.Event do
           owner_id: binary,
           request_id: binary | nil,
           resource_id: binary | nil,
-          resource_type: binary | nil,
+          resource_object: binary | nil,
           sequence: integer,
           type: binary
         }
@@ -25,11 +25,12 @@ defmodule AppRecorder.Events.Event do
     field(:owner_id, :string)
     field(:request_id, :string)
     field(:resource_id, :string)
-    field(:resource_type, :string)
+    field(:resource_object, :string)
     field(:sequence, :integer)
     field(:type, :string)
 
     timestamps(updated_at: false)
+    field(:object, :string, default: "event")
   end
 
   @doc false
@@ -43,7 +44,7 @@ defmodule AppRecorder.Events.Event do
       :owner_id,
       :request_id,
       :resource_id,
-      :resource_type,
+      :resource_object,
       :sequence,
       :type
     ])

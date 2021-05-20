@@ -47,17 +47,18 @@ defmodule AppRecorder.Migrations.V1 do
       add(:owner_id, :string, null: false)
       add(:request_id, :string, null: true)
       add(:resource_id, :string, null: true)
-      add(:resource_type, :string, null: true)
+      add(:resource_object, :string, null: true)
       add(:sequence, :integer, null: false)
       add(:type, :string, null: false)
 
       timestamps(updated_at: false)
+      add(:object, :string, default: "event")
     end
 
     create(index(:app_recorder_events, [:created_at]))
     create(index(:app_recorder_events, [:livemode]))
     create(index(:app_recorder_events, [:owner_id]))
-    create(index(:app_recorder_events, [:resource_type, :resource_id]))
+    create(index(:app_recorder_events, [:resource_object, :resource_id]))
     create(index(:app_recorder_events, [:sequence]))
     create(index(:app_recorder_events, [:type]))
   end

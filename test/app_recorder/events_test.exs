@@ -33,7 +33,7 @@ defmodule AppRecorder.EventsTest do
         [owner_id: event.owner_id],
         [request_id: event.request_id],
         [resource_id: event.resource_id],
-        [resource_type: event.resource_type],
+        [resource_object: event.resource_object],
         [sequence: event.sequence],
         [type: event.type]
       ]
@@ -47,7 +47,7 @@ defmodule AppRecorder.EventsTest do
         [owner_id: uuid()],
         [request_id: "request_id"],
         [resource_id: "resource_id"],
-        [resource_type: "resource_type"],
+        [resource_object: "resource_object"],
         [sequence: 0],
         [type: "type"]
       ]
@@ -65,7 +65,7 @@ defmodule AppRecorder.EventsTest do
         Events.new_event!(%{
           owner_id: uuid(),
           resource_id: "resource_id",
-          resource_type: "resource_type"
+          resource_object: "resource_object"
         })
 
       audit_event_1 = Events.record_event!(event_schema, "resource.created", %{id: "id2"})
@@ -81,7 +81,7 @@ defmodule AppRecorder.EventsTest do
       assert audit_event_1.owner_id == event_schema.owner_id
       assert audit_event_1.request_id == "request_id"
       assert audit_event_1.resource_id == "resource_id"
-      assert audit_event_1.resource_type == "resource_type"
+      assert audit_event_1.resource_object == "resource_object"
       assert audit_event_1.type == "resource.created"
       assert audit_event_2.sequence > audit_event_1.sequence
     end
@@ -122,7 +122,7 @@ defmodule AppRecorder.EventsTest do
       assert audit_event.owner_id == event_schema.owner_id
       assert audit_event.request_id == "request_id"
       assert is_nil(audit_event.resource_id)
-      assert is_nil(audit_event.resource_type)
+      assert is_nil(audit_event.resource_object)
       assert audit_event.type == "resource.created"
     end
 

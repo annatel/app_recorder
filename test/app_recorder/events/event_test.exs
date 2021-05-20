@@ -22,7 +22,7 @@ defmodule AppRecorder.Events.EventTest do
       assert :owner_id in changes_keys
       assert :request_id in changes_keys
       assert :resource_id in changes_keys
-      assert :resource_type in changes_keys
+      assert :resource_object in changes_keys
       assert :sequence in changes_keys
       assert :type in changes_keys
       refute :new_key in changes_keys
@@ -52,7 +52,7 @@ defmodule AppRecorder.Events.EventTest do
       assert get_field(changeset, :owner_id) == event_params.owner_id
       assert get_field(changeset, :request_id) == event_params.request_id
       assert get_field(changeset, :resource_id) == event_params.resource_id
-      assert get_field(changeset, :resource_type) == event_params.resource_type
+      assert get_field(changeset, :resource_object) == event_params.resource_object
       assert get_field(changeset, :sequence) == event_params.sequence
       assert get_field(changeset, :type) == event_params.type
     end
