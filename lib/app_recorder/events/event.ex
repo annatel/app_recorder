@@ -17,6 +17,7 @@ defmodule AppRecorder.Events.Event do
           type: binary
         }
 
+  @derive {Jason.Encoder, except: [:__meta__]}
   @primary_key {:id, Shortcode.Ecto.UUID, prefix: "evt", autogenerate: true}
   schema "app_recorder_events" do
     field(:created_at, :utc_datetime)
