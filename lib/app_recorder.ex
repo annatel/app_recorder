@@ -3,8 +3,6 @@ defmodule AppRecorder do
   AppRecorder
   """
 
-  @behaviour AppRecorder.Behaviour
-
   alias AppRecorder.Events
 
   @doc ~S"""
