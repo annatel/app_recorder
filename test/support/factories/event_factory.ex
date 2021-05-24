@@ -6,7 +6,7 @@ defmodule AppRecorder.Factory.Event do
       def build(:event, attrs) do
         %Event{
           created_at: utc_now(),
-          data: %{},
+          data: %{key: "value"},
           owner_id: uuid(),
           request_id: "request_id_#{System.unique_integer([:positive])}",
           resource_id: "resource_id_#{System.unique_integer()}",

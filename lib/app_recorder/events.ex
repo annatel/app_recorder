@@ -31,39 +31,42 @@ defmodule AppRecorder.Events do
     %{data: events, total: count}
   end
 
-  @spec new_event!(%{:owner_id => binary, optional(atom) => any}) :: Event.t()
-  def new_event!(%{owner_id: _} = fields) do
-    struct!(Event, fields)
-  end
+  @spec record_event!(map, keyword) :: Event.t()
+  def record_event!(attrs, opts \\ []) do
+    allowed_event_types = Keyword.get(opts, :allowed_event_types)
 
-  @spec record_event!(Event.t(), binary, map, [binary]) :: Event.t()
-  def record_event!(%Event{} = event_schema, type, data, opts \\ []) do
     {:ok, event} =
       AppRecorder.repo().transaction(fn repo ->
-        event_schema
-        |> Map.put(:sequence, Sequences.next_value!(:events))
-        |> build!(type, data, opts)
+        attrs =
+          attrs
+          |> Map.merge(%{
+            created_at: DateTime.utc_now(),
+            request_id: Logger.metadata()[:request_id],
+            sequence: Sequences.next_value!(:events)
+          })
+
+        %Event{}
+        |> Event.changeset(attrs)
+        |> maybe_validate_event_type(allowed_event_types)
         |> repo.insert!()
       end)
 
     event
   end
 
-  @spec record_event_multi(Ecto.Multi.t(), Event.t(), binary, map | function, keyword) ::
-          Ecto.Multi.t()
-  def record_event_multi(multi, event_schema, type, mixed, opts \\ [])
+  @spec record_event_multi(Ecto.Multi.t(), map | function, keyword) :: Ecto.Multi.t()
+  def record_event_multi(multi, mixed, opts \\ [])
 
-  def record_event_multi(multi, %Event{} = event_schema, type, fun, opts)
-      when is_function(fun, 2) do
+  def record_event_multi(multi, fun, opts)
+      when is_function(fun, 1) do
     Ecto.Multi.run(multi, :record_event, fn _repo, changes ->
-      {:ok, record_event!(fun.(event_schema, changes), type, %{}, opts)}
+      {:ok, record_event!(fun.(changes), opts)}
     end)
   end
 
-  def record_event_multi(multi, %Event{} = event_schema, type, data, opts)
-      when is_binary(type) and is_map(data) do
+  def record_event_multi(multi, attrs, opts) when is_map(attrs) do
     Multi.run(multi, :record_event, fn _repo, _changes ->
-      {:ok, record_event!(event_schema, type, data, opts)}
+      {:ok, record_event!(attrs, opts)}
     end)
   end
 
@@ -72,19 +75,6 @@ defmodule AppRecorder.Events do
     [filters: [id: id]]
     |> event_queryable()
     |> AppRecorder.repo().one()
-  end
-
-  defp build!(%Event{} = event, type, data, opts)
-       when is_binary(type) and is_map(data) and is_list(opts) do
-    allowed_event_types = Keyword.get(opts, :allowed_event_types)
-
-    Event.changeset(event, %{
-      created_at: DateTime.utc_now(),
-      data: Map.merge(event.data || %{}, data),
-      request_id: Logger.metadata()[:request_id],
-      type: type
-    })
-    |> maybe_validate_event_type(allowed_event_types)
   end
 
   defp maybe_validate_event_type(%Ecto.Changeset{} = changeset, nil), do: changeset

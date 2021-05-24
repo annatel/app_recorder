@@ -61,104 +61,90 @@ defmodule AppRecorder.EventsTest do
     test "when data is valid, creates an event" do
       Logger.metadata(request_id: "request_id")
 
-      event_schema =
-        Events.new_event!(%{
-          owner_id: uuid(),
-          resource_id: "resource_id",
-          resource_object: "resource_object"
-        })
+      event_params = %{
+        data: %{id: "id2"},
+        livemode: false,
+        owner_id: uuid(),
+        resource_id: "resource_id",
+        resource_object: "resource_object",
+        type: "resource.created"
+      }
 
-      audit_event_1 = Events.record_event!(event_schema, "resource.created", %{id: "id2"})
-
-      audit_event_2 = Events.record_event!(event_schema, "resource.created", %{id: "id2"})
+      audit_event_1 = Events.record_event!(event_params)
+      audit_event_2 = Events.record_event!(event_params)
 
       assert %Event{} = audit_event_1
       assert %Event{} = audit_event_2
 
       assert_in_delta DateTime.to_unix(audit_event_1.created_at), DateTime.to_unix(utc_now()), 5
       assert audit_event_1.data == %{id: "id2"}
-      assert audit_event_1.livemode == event_schema.livemode
-      assert audit_event_1.owner_id == event_schema.owner_id
+      assert audit_event_1.livemode == event_params.livemode
+      assert audit_event_1.owner_id == event_params.owner_id
       assert audit_event_1.request_id == "request_id"
-      assert audit_event_1.resource_id == "resource_id"
-      assert audit_event_1.resource_object == "resource_object"
-      assert audit_event_1.type == "resource.created"
+      assert audit_event_1.resource_id == event_params.resource_id
+      assert audit_event_1.resource_object == event_params.resource_object
+      assert audit_event_1.type == event_params.type
+
       assert audit_event_2.sequence > audit_event_1.sequence
     end
 
     test "when data is invalid, raises an Ecto.InvalidChangesetError" do
       assert_raise Ecto.InvalidChangesetError, fn ->
-        Events.record_event!(%Event{}, "resource.created", %{id: "resource_id"})
+        Events.record_event!(%{})
       end
     end
 
     test "when non-existing types and allowed_event_types is specified, raises an Ecto.InvalidChangesetError" do
-      event_schema = Events.new_event!(%{owner_id: uuid()})
+      event_params = params_for(:event)
 
       assert_raise Ecto.InvalidChangesetError, fn ->
-        Events.record_event!(event_schema, "event_type", %{id: "resource_id"},
-          allowed_event_types: []
-        )
+        Events.record_event!(event_params, allowed_event_types: [])
       end
     end
   end
 
   describe "multi/4" do
-    test "create a multi operation with params" do
+    test "create a multi operation with attrs" do
       Logger.metadata(request_id: "request_id")
-      event_schema = Events.new_event!(%{owner_id: uuid()})
+      event_params = params_for(:event)
 
       multi =
         Ecto.Multi.new()
-        |> Events.record_event_multi(event_schema, "resource.created", %{id: "resource_id"})
+        |> Events.record_event_multi(event_params)
 
       assert %Ecto.Multi{} = multi
 
       assert {:ok, %{record_event: %Event{} = audit_event}} = TestRepo.transaction(multi)
 
       assert_in_delta DateTime.to_unix(audit_event.created_at), DateTime.to_unix(utc_now()), 5
-      assert audit_event.data == %{id: "resource_id"}
-      assert audit_event.livemode == event_schema.livemode
-      assert audit_event.owner_id == event_schema.owner_id
+      assert audit_event.data == event_params.data
+      assert audit_event.livemode == event_params.livemode
+      assert audit_event.owner_id == event_params.owner_id
       assert audit_event.request_id == "request_id"
-      assert is_nil(audit_event.resource_id)
-      assert is_nil(audit_event.resource_object)
-      assert audit_event.type == "resource.created"
+      assert audit_event.resource_id == event_params.resource_id
+      assert audit_event.resource_object == event_params.resource_object
+      assert audit_event.type == event_params.type
     end
 
     test "creates an ecto multi operation with a function" do
-      event_schema = Events.new_event!(%{owner_id: uuid()})
-      any_schema = Event.changeset(%Event{}, params_for(:event))
+      event_params = params_for(:event)
 
       multi =
         Ecto.Multi.new()
-        |> Ecto.Multi.insert(:any_schema, any_schema)
-        |> Events.record_event_multi(
-          event_schema,
-          "resource.created",
-          fn event_schema, changes ->
-            assert %Event{} = event_schema
-            assert %{any_schema: %Event{}} = changes
+        |> Events.record_event_multi(fn _changes -> event_params end)
 
-            %{event_schema | data: %{id: changes.any_schema.id}}
-          end
-        )
+      assert {:ok, %{record_event: %Event{} = audit_event}} = TestRepo.transaction(multi)
 
-      assert {:ok, %{record_event: %Event{} = audit_event, any_schema: any_schema}} =
-               TestRepo.transaction(multi)
-
-      assert audit_event.data == %{id: any_schema.id}
-      assert audit_event.type == "resource.created"
+      assert audit_event.data == event_params.data
+      assert audit_event.type == event_params.type
     end
 
     test "when non-existing types and allowed_event_types is specified, returns a changeset error" do
-      event_schema = Events.new_event!(%{owner_id: uuid()})
+      event_params = params_for(:event)
 
       multi =
         Ecto.Multi.new()
-        |> Events.record_event_multi(event_schema, "resource.created", %{id: "resource_id"},
-          allowed_event_types: []
-        )
+        |> Events.record_event_multi(event_params, allowed_event_types: [])
 
       assert_raise Ecto.InvalidChangesetError, fn ->
         TestRepo.transaction(multi)
