@@ -36,8 +36,11 @@ defmodule AppRecorder do
   @doc ~S"""
   Get an event
   """
-  @spec get_event(binary) :: Event.t()
+  @spec get_event(binary) :: Event.t() | nil
   defdelegate get_event(id), to: Events
+
+  @spec get_event!(binary) :: Event.t()
+  defdelegate get_event!(id), to: Events
 
   @doc false
   @spec repo :: module
