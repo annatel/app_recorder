@@ -77,6 +77,13 @@ defmodule AppRecorder.Events do
     |> AppRecorder.repo().one()
   end
 
+  @spec get_event!(binary) :: Event.t()
+  def get_event!(id) when is_binary(id) do
+    [filters: [id: id]]
+    |> event_queryable()
+    |> AppRecorder.repo().one!()
+  end
+
   defp maybe_validate_event_type(%Ecto.Changeset{} = changeset, nil), do: changeset
 
   defp maybe_validate_event_type(%Ecto.Changeset{} = changeset, allowed_event_types)

@@ -152,7 +152,7 @@ defmodule AppRecorder.EventsTest do
     end
   end
 
-  describe "get_event/2" do
+  describe "get_event/1" do
     test "when the event exists, returns the event" do
       %{id: id} = insert!(:event)
 
@@ -161,6 +161,20 @@ defmodule AppRecorder.EventsTest do
 
     test "when then event does not exist, returns nil" do
       assert is_nil(Events.get_event(uuid()))
+    end
+  end
+
+  describe "get_event!/1" do
+    test "when the event exists, returns the event" do
+      %{id: id} = insert!(:event)
+
+      assert %Event{id: ^id} = Events.get_event!(id)
+    end
+
+    test "when then event does not exist, returns nil" do
+      assert_raise Ecto.NoResultsError, fn ->
+        Events.get_event!(uuid())
+      end
     end
   end
 end
