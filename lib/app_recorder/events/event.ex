@@ -1,22 +1,22 @@
 defmodule AppRecorder.Events.Event do
-  use Ecto.Schema
   use AppRecorder.Events.EventSchema
 
   import Ecto.Changeset, only: [cast: 3, validate_required: 2]
 
   alias AppRecorder.Extensions.Ecto.Types.RequestId
 
-  # @type t :: %__MODULE__{
-  #         api_version: binary,
-  #         created_at: DateTime.t(),
-  #         data: map,
-  #         id: binary,
-  #         inserted_at: DateTime.t(),
-  #         request_id: binary | nil,
-  #         resource_id: binary | nil,
-  #         resource_object: binary | nil,
-  #         type: binary
-  #       }
+  @type t :: %__MODULE__{
+          api_version: binary,
+          created_at: DateTime.t(),
+          data: map,
+          idempotency_key: binary | nil,
+          inserted_at: DateTime.t(),
+          object: binary,
+          request_id: binary | nil,
+          resource_id: binary | nil,
+          resource_object: binary | nil,
+          type: binary
+        }
 
   @derive {Jason.Encoder, except: [:__meta__]}
   schema "app_recorder_events" do
@@ -26,7 +26,6 @@ defmodule AppRecorder.Events.Event do
     field(:created_at, :utc_datetime)
     field(:data, :map, default: %{})
     field(:idempotency_key, :string)
-
     field(:request_id, RequestId, prefix: "req")
     field(:resource_id, :string)
     field(:resource_object, :string)
@@ -44,13 +43,12 @@ defmodule AppRecorder.Events.Event do
       :created_at,
       :data,
       :idempotency_key,
-      :livemode,
       :request_id,
       :resource_id,
       :resource_object,
       :type
     ])
-    |> validate_required([:created_at, :data, :livemode, :type])
-    |> validate_configurable_event_schema(attrs)
+    |> validate_required([:created_at, :data, :type])
+    |> validate_configurable_fields(attrs)
   end
 end

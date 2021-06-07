@@ -22,11 +22,11 @@ defmodule AppRecorder.Factory.Event do
 
       defp put_owner_id(%Event{} = event) do
         owner_id_value =
-          if AppRecorder.owner_id_field_type() == :string,
+          if elem(AppRecorder.owner_id_field(), 1) == :binary_id,
             do: uuid(),
             else: id()
 
-        event |> Map.put(AppRecorder.owner_id_field_name(), owner_id_value)
+        event |> Map.put(elem(AppRecorder.owner_id_field(), 0), owner_id_value)
       end
 
       defp maybe_put_sequence(%Event{} = event) do
@@ -39,7 +39,7 @@ defmodule AppRecorder.Factory.Event do
       end
 
       defp maybe_put_livemode(%Event{} = event) do
-        attrs = if AppRecorder.with_livemode?(), do: %{livemode: true}, else: %{}
+        attrs = if AppRecorder.with_livemode?(), do: %{livemode: false}, else: %{}
 
         event |> Map.merge(attrs)
       end

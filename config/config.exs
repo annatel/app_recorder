@@ -14,9 +14,8 @@ if(Mix.env() == :test) do
     repo: AppRecorder.TestRepo
 
   config :app_recorder,
-    owner_id_field_name: :owner_id,
-    owner_id_field_type: :string,
+    primary_key_type: :binary_id,
+    owner_id_field: {:owner_id, :binary_id, []},
     with_livemode?: true,
-    with_sequence?: true,
-    use_uuid_as_primary_key?: true
+    with_sequence?: true
 end

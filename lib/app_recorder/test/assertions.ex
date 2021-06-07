@@ -12,7 +12,7 @@ defmodule AppRecorder.Test.Assertions do
       assert_event_recorded(%{resource_id: "id")
   """
   def assert_event_recorded(attrs \\ %{}) do
-    %{total: total, data: _} = AppRecorder.list_events(filters: attrs |> Enum.to_list())
+    %{total: total, data: _} = AppRecorder.Events.list_events(filters: attrs |> Enum.to_list())
 
     message =
       if Enum.empty?(attrs) do

@@ -1,5 +1,6 @@
 defmodule AppRecorder.Factory do
   use AppRecorder.Factory.Event
+  use AppRecorder.Factory.Request
 
   alias AppRecorder.TestRepo
 

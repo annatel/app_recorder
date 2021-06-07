@@ -2,10 +2,14 @@ defmodule AppRecorder.TestRepo.Migrations.CreateAppRecorderTables do
   use Ecto.Migration
 
   def up do
-    AppRecorder.Migrations.up(from_version: 0, to_version: 1)
+    AppRecorder.Migrations.V1.up()
+    AppRecorder.Migrations.Events.V1.up()
+    AppRecorder.Migrations.Requests.V1.up()
   end
 
   def down do
-    AppRecorder.Migrations.down(from_version: 1, to_version: 0)
+    AppRecorder.Migrations.V1.down()
+    AppRecorder.Migrations.Events.V1.down()
+    AppRecorder.Migrations.Requests.V1.down()
   end
 end
