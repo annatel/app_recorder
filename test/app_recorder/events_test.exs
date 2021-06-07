@@ -45,7 +45,7 @@ defmodule AppRecorder.EventsTest do
         [id: uuid()],
         [livemode: !event.livemode],
         [owner_id: uuid()],
-        [request_id: "request_id"],
+        [request_id: request_id()],
         [resource_id: "resource_id"],
         [resource_object: "resource_object"],
         [sequence: 0],
@@ -59,7 +59,9 @@ defmodule AppRecorder.EventsTest do
 
   describe "record_event!/3" do
     test "when data is valid, creates an event" do
-      Logger.metadata(request_id: "request_id")
+      request_id = request_id("req")
+      [_, phx_request_id] = request_id |> String.split("_", parts: 2)
+      Logger.metadata(request_id: phx_request_id)
 
       event_params = %{
         data: %{id: "id2"},
@@ -80,7 +82,7 @@ defmodule AppRecorder.EventsTest do
       assert audit_event_1.data == %{id: "id2"}
       assert audit_event_1.livemode == event_params.livemode
       assert audit_event_1.owner_id == event_params.owner_id
-      assert audit_event_1.request_id == "request_id"
+      assert audit_event_1.request_id == request_id
       assert audit_event_1.resource_id == event_params.resource_id
       assert audit_event_1.resource_object == event_params.resource_object
       assert audit_event_1.type == event_params.type
@@ -105,7 +107,10 @@ defmodule AppRecorder.EventsTest do
 
   describe "multi/4" do
     test "create a multi operation with attrs" do
-      Logger.metadata(request_id: "request_id")
+      request_id = request_id("req")
+      [_, phx_request_id] = request_id |> String.split("_", parts: 2)
+      Logger.metadata(request_id: phx_request_id)
+
       event_params = params_for(:event)
 
       multi =
@@ -120,7 +125,8 @@ defmodule AppRecorder.EventsTest do
       assert audit_event.data == event_params.data
       assert audit_event.livemode == event_params.livemode
       assert audit_event.owner_id == event_params.owner_id
-      assert audit_event.request_id == "request_id"
+      assert audit_event.idempotency_key == event_params.idempotency_key
+      assert audit_event.request_id == request_id
       assert audit_event.resource_id == event_params.resource_id
       assert audit_event.resource_object == event_params.resource_object
       assert audit_event.type == event_params.type

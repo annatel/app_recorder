@@ -10,7 +10,6 @@ defmodule AppRecorder.Events do
 
   @default_page_number 1
   @default_page_size 100
-  @default_order_by_fields [desc: :sequence]
 
   @spec list_events(keyword) :: %{data: [Event.t()], total: integer}
   def list_events(opts \\ []) do
@@ -41,9 +40,10 @@ defmodule AppRecorder.Events do
           attrs
           |> Map.merge(%{
             created_at: DateTime.utc_now(),
-            request_id: Logger.metadata()[:request_id],
-            sequence: Sequences.next_value!(:events)
+            idempotentcy_key: Logger.metadata()[:idempotentcy_key],
+            request_id: Logger.metadata()[:request_id]
           })
+          |> maybe_put_sequence()
 
         %Event{}
         |> Event.changeset(attrs)
@@ -102,8 +102,14 @@ defmodule AppRecorder.Events do
   defp list_order_by_fields(opts) do
     Keyword.get(opts, :order_by_fields, [])
     |> case do
-      [] -> @default_order_by_fields
+      [] -> if AppRecorder.with_sequence?(), do: [desc: :sequence], else: [desc: :id]
       [_ | _] = order_by_fields -> order_by_fields
     end
+  end
+
+  defp maybe_put_sequence(attrs) do
+    if AppRecorder.with_sequence?(),
+      do: Map.put(attrs, :sequence, Sequences.next_value!(:events)),
+      else: attrs
   end
 end

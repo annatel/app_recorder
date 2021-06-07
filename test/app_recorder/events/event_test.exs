@@ -50,7 +50,7 @@ defmodule AppRecorder.Events.EventTest do
       assert get_field(changeset, :data) == event_params.data
       assert get_field(changeset, :livemode) == event_params.livemode
       assert get_field(changeset, :owner_id) == event_params.owner_id
-      assert get_field(changeset, :request_id) == event_params.request_id
+      assert get_field(changeset, :request_id) == "req_" <> event_params.request_id
       assert get_field(changeset, :resource_id) == event_params.resource_id
       assert get_field(changeset, :resource_object) == event_params.resource_object
       assert get_field(changeset, :sequence) == event_params.sequence

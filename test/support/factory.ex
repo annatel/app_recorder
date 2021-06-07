@@ -8,6 +8,16 @@ defmodule AppRecorder.Factory do
     Ecto.UUID.generate()
   end
 
+  @spec id :: integer
+  def id(), do: System.unique_integer([:positive])
+
+  @spec request_id(binary | nil) :: binary
+  def request_id(prefix \\ nil) do
+    request_id = Base.url_encode64(<<System.system_time(:nanosecond)::120>>)
+
+    if prefix, do: "#{prefix}_" <> request_id, else: request_id
+  end
+
   @spec utc_now :: DateTime.t()
   def utc_now(), do: DateTime.utc_now() |> DateTime.truncate(:second)
 
