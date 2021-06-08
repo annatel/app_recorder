@@ -15,8 +15,8 @@ defmodule AppRecorder.EventsTest do
     end
 
     test "order_by" do
-      %{id: id1} = insert!(:event)
-      %{id: id2} = insert!(:event)
+      %{id: id1} = insert!(:event, sequence: 1)
+      %{id: id2} = insert!(:event, sequence: 2)
 
       assert %{data: [%{id: ^id2}, %{id: ^id1}]} = Events.list_events()
 
@@ -61,9 +61,8 @@ defmodule AppRecorder.EventsTest do
 
   describe "record_event!/3" do
     test "when data is valid, creates an event" do
-      request_id = request_id("req")
-      [_, phx_request_id] = request_id |> String.split("_", parts: 2)
-      Logger.metadata(request_id: phx_request_id)
+      request_id = request_id()
+      Logger.metadata(request_id: request_id)
 
       event_params = %{
         data: %{id: "id2"},
@@ -109,9 +108,8 @@ defmodule AppRecorder.EventsTest do
 
   describe "multi/4" do
     test "create a multi operation with attrs" do
-      request_id = request_id("req")
-      [_, phx_request_id] = request_id |> String.split("_", parts: 2)
-      Logger.metadata(request_id: phx_request_id)
+      request_id = request_id()
+      Logger.metadata(request_id: request_id)
 
       event_params = params_for(:event)
 
@@ -165,6 +163,12 @@ defmodule AppRecorder.EventsTest do
       %{id: id} = insert!(:event)
 
       assert %Event{id: ^id} = Events.get_event(id)
+    end
+
+    test "when the id is not right prefixed, returns nil" do
+      %{id: id} = insert!(:event)
+      wrong_prefixed_id = String.replace(id, "evt", "prefix")
+      assert is_nil(Events.get_event(wrong_prefixed_id))
     end
 
     test "when then event does not exist, returns nil" do

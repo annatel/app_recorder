@@ -13,10 +13,11 @@ defmodule AppRecorder.Migrations.Requests.V1 do
 
   defp create_requests_table do
     create table(:app_recorder_requests, primary_key: false) do
-      primary_key_type =
-        if repo().__adapter__() == Ecto.Adapters.Postgres, do: :bytea, else: :binary_id
-
-      add(:id, primary_key_type, primary_key: true)
+      if repo().__adapter__() == Ecto.Adapters.Postgres do
+        add(:id, :bytea, primary_key: true)
+      else
+        add(:id, :binary, primary_key: true, size: 15)
+      end
 
       add(elem(AppRecorder.owner_id_field(), 0), elem(AppRecorder.owner_id_field(), 1),
         null: false

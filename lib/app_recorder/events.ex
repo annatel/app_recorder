@@ -93,9 +93,13 @@ defmodule AppRecorder.Events do
 
   @spec get_event(binary) :: Event.t() | nil
   def get_event(id) when is_binary(id) do
-    [filters: [id: id]]
-    |> event_queryable()
-    |> AppRecorder.repo().one()
+    try do
+      [filters: [id: id]]
+      |> event_queryable()
+      |> AppRecorder.repo().one()
+    rescue
+      Ecto.Query.CastError -> nil
+    end
   end
 
   @spec get_event!(binary) :: Event.t()

@@ -12,11 +12,9 @@ defmodule AppRecorder.Factory do
   @spec id :: integer
   def id(), do: System.unique_integer([:positive])
 
-  @spec request_id(binary | nil) :: binary
-  def request_id(prefix \\ nil) do
-    request_id = Base.url_encode64(<<System.system_time(:nanosecond)::120>>)
-
-    if prefix, do: "#{prefix}_" <> request_id, else: request_id
+  @spec request_id() :: binary
+  def request_id() do
+    AppRecorder.RequestId.generate_request_id("req")
   end
 
   @spec utc_now :: DateTime.t()

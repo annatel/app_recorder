@@ -33,22 +33,26 @@ defmodule AppRecorder.Requests do
   @spec record_request!(map) :: Request.t()
   def record_request!(attrs) when is_map(attrs) do
     %Request{}
-    |> Request.changeset(attrs)
+    |> Request.create_changeset(attrs)
     |> AppRecorder.repo().insert!()
   end
 
   @spec update_request!(Request.t(), map) :: Request.t()
   def update_request!(%Request{} = request, attrs) when is_map(attrs) do
     request
-    |> Request.changeset(attrs)
+    |> Request.update_changeset(attrs)
     |> AppRecorder.repo().update!()
   end
 
   @spec get_request(binary) :: Request.t() | nil
   def get_request(id) when is_binary(id) do
-    [filters: [id: id]]
-    |> request_queryable()
-    |> AppRecorder.repo().one()
+    try do
+      [filters: [id: id]]
+      |> request_queryable()
+      |> AppRecorder.repo().one()
+    rescue
+      Ecto.Query.CastError -> nil
+    end
   end
 
   @spec get_request_by(keyword) :: Request.t() | nil

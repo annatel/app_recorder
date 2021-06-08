@@ -33,8 +33,8 @@ defmodule AppRecorder.Requests.Request do
     field(:object, :string, default: "request")
   end
 
-  @spec changeset(Request.t(), map()) :: Ecto.Changeset.t()
-  def changeset(%__MODULE__{} = request, attrs) when is_map(attrs) do
+  @spec create_changeset(Request.t(), map()) :: Ecto.Changeset.t()
+  def create_changeset(%__MODULE__{} = request, attrs) when is_map(attrs) do
     request
     |> cast(attrs, [
       :id,
@@ -52,5 +52,11 @@ defmodule AppRecorder.Requests.Request do
       :request_data
     ])
     |> validate_configurable_fields(attrs)
+  end
+
+  @spec update_changeset(Request.t(), map()) :: Ecto.Changeset.t()
+  def update_changeset(%__MODULE__{} = request, attrs) when is_map(attrs) do
+    request
+    |> cast(attrs, [:response_data, :success])
   end
 end
