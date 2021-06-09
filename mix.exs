@@ -33,7 +33,8 @@ defmodule AppRecorder.MixProject do
       {:myxql, "~> 0.4.0"},
       {:shortcode, "~> 0.5.0"},
       {:antl_utils_ecto, "~> 1.3.0"},
-      {:jason, "~> 1.2"}
+      {:jason, "~> 1.2"},
+      {:recase, "~> 0.7"}
     ]
   end
 
