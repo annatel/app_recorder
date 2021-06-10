@@ -28,17 +28,6 @@ defmodule AppRecorder.Events.EventTest do
       refute :new_key in changes_keys
     end
 
-    test "when required params are missing, returns an invalid changeset" do
-      changeset = Event.changeset(%Event{}, %{data: nil})
-
-      refute changeset.valid?
-      assert %{created_at: ["can't be blank"]} = errors_on(changeset)
-      assert %{data: ["can't be blank"]} = errors_on(changeset)
-      assert %{owner_id: ["can't be blank"]} = errors_on(changeset)
-      assert %{sequence: ["can't be blank"]} = errors_on(changeset)
-      assert %{type: ["can't be blank"]} = errors_on(changeset)
-    end
-
     test "when params are valid, return a valid changeset" do
       event_params = params_for(:event)
 
@@ -55,6 +44,17 @@ defmodule AppRecorder.Events.EventTest do
       assert get_field(changeset, :resource_object) == event_params.resource_object
       assert get_field(changeset, :sequence) == event_params.sequence
       assert get_field(changeset, :type) == event_params.type
+    end
+
+    test "when required params are missing, returns an invalid changeset" do
+      changeset = Event.changeset(%Event{}, %{data: nil})
+
+      refute changeset.valid?
+      assert %{created_at: ["can't be blank"]} = errors_on(changeset)
+      assert %{data: ["can't be blank"]} = errors_on(changeset)
+      assert %{owner_id: ["can't be blank"]} = errors_on(changeset)
+      assert %{sequence: ["can't be blank"]} = errors_on(changeset)
+      assert %{type: ["can't be blank"]} = errors_on(changeset)
     end
   end
 end

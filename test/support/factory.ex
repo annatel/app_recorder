@@ -1,11 +1,18 @@
 defmodule AppRecorder.Factory do
   use AppRecorder.Factory.Event
+  use AppRecorder.Factory.Request
 
   alias AppRecorder.TestRepo
 
   @spec uuid :: <<_::288>>
-  def uuid() do
-    Ecto.UUID.generate()
+  def uuid(), do: Ecto.UUID.generate()
+
+  @spec id :: integer
+  def id(), do: System.unique_integer([:positive])
+
+  @spec request_id() :: binary
+  def request_id() do
+    AppRecorder.RequestId.generate_request_id("req")
   end
 
   @spec utc_now :: DateTime.t()

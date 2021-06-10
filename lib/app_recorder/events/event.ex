@@ -1,33 +1,34 @@
 defmodule AppRecorder.Events.Event do
-  use Ecto.Schema
+  use AppRecorder.Events.EventSchema
 
   import Ecto.Changeset, only: [cast: 3, validate_required: 2]
 
+  alias AppRecorder.Extensions.Ecto.Types.RequestId
+
   @type t :: %__MODULE__{
+          api_version: binary,
           created_at: DateTime.t(),
           data: map,
-          id: binary,
+          idempotency_key: binary | nil,
           inserted_at: DateTime.t(),
-          livemode: boolean,
-          owner_id: binary,
+          object: binary,
           request_id: binary | nil,
           resource_id: binary | nil,
           resource_object: binary | nil,
-          sequence: integer,
           type: binary
         }
 
   @derive {Jason.Encoder, except: [:__meta__]}
-  @primary_key {:id, Shortcode.Ecto.UUID, prefix: "evt", autogenerate: true}
   schema "app_recorder_events" do
+    configurable_fields()
+
+    field(:api_version, :string, default: "2021-01-01")
     field(:created_at, :utc_datetime)
     field(:data, :map, default: %{})
-    field(:livemode, :boolean, default: true)
-    field(:owner_id, :string)
-    field(:request_id, :string)
+    field(:idempotency_key, :string)
+    field(:request_id, RequestId, prefix: "req")
     field(:resource_id, :string)
     field(:resource_object, :string)
-    field(:sequence, :integer)
     field(:type, :string)
 
     timestamps(updated_at: false)
@@ -41,14 +42,13 @@ defmodule AppRecorder.Events.Event do
     |> cast(attrs, [
       :created_at,
       :data,
-      :livemode,
-      :owner_id,
+      :idempotency_key,
       :request_id,
       :resource_id,
       :resource_object,
-      :sequence,
       :type
     ])
-    |> validate_required([:created_at, :data, :livemode, :owner_id, :sequence, :type])
+    |> validate_required([:created_at, :data, :type])
+    |> validate_configurable_fields(attrs)
   end
 end

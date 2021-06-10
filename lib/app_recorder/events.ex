@@ -1,16 +1,20 @@
 defmodule AppRecorder.Events do
-  @moduledoc false
+  @moduledoc """
+  The requests context.
+  """
 
-  require Ecto.Query
+  import Ecto.Query, only: [order_by: 2]
 
   alias Ecto.Multi
 
-  alias AppRecorder.Sequences
   alias AppRecorder.Events.{Event, EventQueryable}
 
   @default_page_number 1
   @default_page_size 100
-  @default_order_by_fields [desc: :sequence]
+
+  @doc ~S"""
+  List all events
+  """
 
   @spec list_events(keyword) :: %{data: [Event.t()], total: integer}
   def list_events(opts \\ []) do
@@ -25,12 +29,20 @@ defmodule AppRecorder.Events do
     events =
       query
       |> EventQueryable.paginate(page_number, page_size)
-      |> Ecto.Query.order_by(^order_by_fields)
+      |> order_by(^order_by_fields)
       |> AppRecorder.repo().all()
 
     %{data: events, total: count}
   end
 
+  @doc ~S"""
+  Record an event
+
+  ## Options
+
+    * `:allowed_event_types` - List of allowed event types
+
+  """
   @spec record_event!(map, keyword) :: Event.t()
   def record_event!(attrs, opts \\ []) do
     allowed_event_types = Keyword.get(opts, :allowed_event_types)
@@ -41,9 +53,10 @@ defmodule AppRecorder.Events do
           attrs
           |> Map.merge(%{
             created_at: DateTime.utc_now(),
-            request_id: Logger.metadata()[:request_id],
-            sequence: Sequences.next_value!(:events)
+            idempotentcy_key: Logger.metadata()[:idempotentcy_key],
+            request_id: Logger.metadata()[:request_id]
           })
+          |> maybe_put_sequence()
 
         %Event{}
         |> Event.changeset(attrs)
@@ -54,6 +67,14 @@ defmodule AppRecorder.Events do
     event
   end
 
+  @doc ~S"""
+  Return an record event multi
+
+  ## Options
+
+    * `:allowed_event_types` - List of allowed event types
+
+  """
   @spec record_event_multi(Ecto.Multi.t(), map | function, keyword) :: Ecto.Multi.t()
   def record_event_multi(multi, mixed, opts \\ [])
 
@@ -72,9 +93,13 @@ defmodule AppRecorder.Events do
 
   @spec get_event(binary) :: Event.t() | nil
   def get_event(id) when is_binary(id) do
-    [filters: [id: id]]
-    |> event_queryable()
-    |> AppRecorder.repo().one()
+    try do
+      [filters: [id: id]]
+      |> event_queryable()
+      |> AppRecorder.repo().one()
+    rescue
+      Ecto.Query.CastError -> nil
+    end
   end
 
   @spec get_event!(binary) :: Event.t()
@@ -102,8 +127,14 @@ defmodule AppRecorder.Events do
   defp list_order_by_fields(opts) do
     Keyword.get(opts, :order_by_fields, [])
     |> case do
-      [] -> @default_order_by_fields
+      [] -> if AppRecorder.with_sequence?(), do: [desc: :sequence], else: [desc: :id]
       [_ | _] = order_by_fields -> order_by_fields
     end
+  end
+
+  defp maybe_put_sequence(attrs) do
+    if AppRecorder.with_sequence?(),
+      do: Map.put(attrs, :sequence, AppRecorder.Sequences.next_value!(:events)),
+      else: attrs
   end
 end
