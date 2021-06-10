@@ -1,6 +1,8 @@
 defmodule AppRecorder.Test.Assertions do
   import ExUnit.Assertions
 
+  alias AppRecorder.Events
+
   @doc """
   Asserts the event is created
 
@@ -16,7 +18,7 @@ defmodule AppRecorder.Test.Assertions do
 
   def assert_event_recorded(%{data: %{} = data} = attrs) do
     %{total: total, data: events} =
-      AppRecorder.list_events(filter: attrs |> Map.delete(:data) |> Enum.to_list())
+      Events.list_events(filter: attrs |> Map.delete(:data) |> Enum.to_list())
 
     assert total != 0, message(attrs)
 
@@ -27,7 +29,7 @@ defmodule AppRecorder.Test.Assertions do
   end
 
   def assert_event_recorded(attrs) do
-    %{total: total} = AppRecorder.list_events(filter: attrs |> Enum.to_list())
+    %{total: total} = Events.list_events(filter: attrs |> Enum.to_list())
 
     assert total != 0, message(attrs)
   end
