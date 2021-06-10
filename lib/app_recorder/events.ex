@@ -69,7 +69,7 @@ defmodule AppRecorder.Events do
           attrs
           |> Map.merge(%{
             created_at: DateTime.utc_now(),
-            request_id: Logger.metadata()[:request_id],
+            request_id: Map.get(attrs, :request_id) || Logger.metadata()[:request_id],
             request_idempotency_key: Logger.metadata()[:request_idempotency_key]
           })
           |> maybe_put_sequence()

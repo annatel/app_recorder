@@ -68,7 +68,7 @@ defmodule AppRecorder.EventsTest do
       Logger.metadata(request_id: request_id)
       Logger.metadata(request_idempotency_key: request_idempotency_key)
 
-      event_params = params_for(:event)
+      event_params = params_for(:event, request_id: nil)
 
       event_1 = Events.record_event!(event_params)
       event_2 = Events.record_event!(params_for(:event))
@@ -97,6 +97,14 @@ defmodule AppRecorder.EventsTest do
       assert %{id: ^event_id} = Events.record_event!(event_params)
     end
 
+    test "request_id can be set from attrs" do
+      request_id = request_id()
+      Logger.metadata(request_id: nil)
+      event_params = params_for(:event, request_id: request_id)
+
+      assert %{request_id: ^request_id} = Events.record_event!(event_params)
+    end
+
     test "when data is invalid, raises an Ecto.InvalidChangesetError" do
       assert_raise Ecto.InvalidChangesetError, fn ->
         Events.record_event!(%{})
@@ -115,9 +123,11 @@ defmodule AppRecorder.EventsTest do
   describe "multi/4" do
     test "create a multi operation with attrs" do
       request_id = request_id()
+      request_idempotency_key = "request_idempotency_key"
       Logger.metadata(request_id: request_id)
+      Logger.metadata(request_idempotency_key: request_idempotency_key)
 
-      event_params = params_for(:event)
+      event_params = params_for(:event, request_id: nil)
 
       multi =
         Ecto.Multi.new()
@@ -129,10 +139,11 @@ defmodule AppRecorder.EventsTest do
 
       assert_in_delta DateTime.to_unix(event.created_at), DateTime.to_unix(utc_now()), 5
       assert event.data == event_params.data
+      assert event.idempotency_key == event_params.idempotency_key
       assert event.livemode == event_params.livemode
       assert event.owner_id == event_params.owner_id
-      assert event.idempotency_key == event_params.idempotency_key
       assert event.request_id == request_id
+      assert event.request_idempotency_key == request_idempotency_key
       assert event.resource_id == event_params.resource_id
       assert event.resource_object == event_params.resource_object
       assert event.type == event_params.type
