@@ -33,6 +33,7 @@ defmodule AppRecorder.EventsTest do
         [livemode: event.livemode],
         [owner_id: event.owner_id],
         [request_id: event.request_id],
+        [request_idempotency_key: event.request_idempotency_key],
         [resource_id: event.resource_id],
         [resource_object: event.resource_object],
         [sequence: event.sequence],
@@ -48,6 +49,7 @@ defmodule AppRecorder.EventsTest do
         [livemode: !event.livemode],
         [owner_id: uuid()],
         [request_id: request_id()],
+        [request_idempotency_key: "request_idempotency_key"],
         [resource_id: "resource_id"],
         [resource_object: "resource_object"],
         [sequence: 0],
@@ -62,33 +64,37 @@ defmodule AppRecorder.EventsTest do
   describe "record_event!/3" do
     test "when data is valid, creates an event" do
       request_id = request_id()
+      request_idempotency_key = "request_idempotency_key"
       Logger.metadata(request_id: request_id)
+      Logger.metadata(request_idempotency_key: request_idempotency_key)
 
-      event_params = %{
-        data: %{id: "id2"},
-        livemode: false,
-        owner_id: uuid(),
-        resource_id: "resource_id",
-        resource_object: "resource_object",
-        type: "resource.created"
-      }
+      event_params = params_for(:event)
 
       event_1 = Events.record_event!(event_params)
-      event_2 = Events.record_event!(event_params)
+      event_2 = Events.record_event!(params_for(:event))
 
       assert %Event{} = event_1
       assert %Event{} = event_2
 
       assert_in_delta DateTime.to_unix(event_1.created_at), DateTime.to_unix(utc_now()), 5
-      assert event_1.data == %{id: "id2"}
+      assert event_1.data == event_1.data
+      assert event_1.idempotency_key == event_params.idempotency_key
       assert event_1.livemode == event_params.livemode
       assert event_1.owner_id == event_params.owner_id
       assert event_1.request_id == request_id
+      assert event_1.request_idempotency_key == request_idempotency_key
       assert event_1.resource_id == event_params.resource_id
       assert event_1.resource_object == event_params.resource_object
       assert event_1.type == event_params.type
 
       assert event_2.sequence > event_1.sequence
+    end
+
+    test "when an event already exists with the idempotency_key, no matter the other params, do not create a new event and returns already recorded event" do
+      %{id: event_id} = event = insert!(:event)
+      event_params = params_for(:event, idempotency_key: event.idempotency_key)
+
+      assert %{id: ^event_id} = Events.record_event!(event_params)
     end
 
     test "when data is invalid, raises an Ecto.InvalidChangesetError" do

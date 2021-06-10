@@ -47,24 +47,43 @@ defmodule AppRecorder.Events do
   def record_event!(attrs, opts \\ []) do
     allowed_event_types = Keyword.get(opts, :allowed_event_types)
 
-    {:ok, event} =
-      AppRecorder.repo().transaction(fn repo ->
+    Multi.new()
+    |> Multi.put(:idempotency_key, Map.get(attrs, :idempotency_key))
+    |> Multi.run(:lock_idempotency_key, fn
+      _, %{idempotency_key: nil} -> {:ok, nil}
+      _, %{idempotency_key: idempotency_key} -> {:ok, Padlock.Mutexes.lock!(idempotency_key)}
+    end)
+    |> Multi.run(:original_event, fn
+      _, %{idempotency_key: nil} ->
+        {:ok, nil}
+
+      _, %{idempotency_key: idempotency_key} ->
+        {:ok, get_event_by(idempotency_key: idempotency_key)}
+    end)
+    |> Multi.run(:event, fn
+      _, %{original_event: %Event{} = event} ->
+        {:ok, event}
+
+      repo, %{original_event: nil} ->
         attrs =
           attrs
           |> Map.merge(%{
             created_at: DateTime.utc_now(),
-            idempotentcy_key: Logger.metadata()[:idempotentcy_key],
-            request_id: Logger.metadata()[:request_id]
+            request_id: Logger.metadata()[:request_id],
+            request_idempotency_key: Logger.metadata()[:request_idempotency_key]
           })
           |> maybe_put_sequence()
 
-        %Event{}
-        |> Event.changeset(attrs)
-        |> maybe_validate_event_type(allowed_event_types)
-        |> repo.insert!()
-      end)
-
-    event
+        {:ok,
+         %Event{}
+         |> Event.changeset(attrs)
+         |> maybe_validate_event_type(allowed_event_types)
+         |> repo.insert!()}
+    end)
+    |> AppRecorder.repo().transaction()
+    |> case do
+      {:ok, %{event: event}} -> event
+    end
   end
 
   @doc ~S"""
@@ -107,6 +126,14 @@ defmodule AppRecorder.Events do
     [filters: [id: id]]
     |> event_queryable()
     |> AppRecorder.repo().one!()
+  end
+
+  defp get_event_by(idempotency_key: nil), do: nil
+
+  defp get_event_by(idempotency_key: idempotency_key) do
+    [filters: [idempotency_key: idempotency_key]]
+    |> event_queryable()
+    |> AppRecorder.repo().one()
   end
 
   defp maybe_validate_event_type(%Ecto.Changeset{} = changeset, nil), do: changeset

@@ -13,6 +13,9 @@ if(Mix.env() == :test) do
   config :app_recorder,
     repo: AppRecorder.TestRepo
 
+  config :padlock,
+    repo: AppRecorder.TestRepo
+
   config :app_recorder,
     primary_key_type: :binary_id,
     owner_id_field: {:owner_id, :binary_id, []},

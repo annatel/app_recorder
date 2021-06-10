@@ -36,7 +36,8 @@ defmodule AppRecorder.MixProject do
       {:antl_utils_ecto, "~> 1.3.0"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.0"},
-      {:recase, "~> 0.7"}
+      {:recase, "~> 0.7"},
+      {:padlock, git: "https://github.com/annatel/padlock.git", tag: "0.2.0"}
     ]
   end
 

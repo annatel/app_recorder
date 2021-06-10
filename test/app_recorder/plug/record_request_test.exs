@@ -51,8 +51,5 @@ defmodule AppRecorder.Plug.RecordRequestTest do
 
       assert request.response_data == %{"body" => "Welcome", "headers" => [], "status" => 200}
     end
-
-    # test "when with_livemode? is true, the livemode? variable must be in assigns" do
-    # end
   end
 end

@@ -13,6 +13,7 @@ defmodule AppRecorder.Events.Event do
           inserted_at: DateTime.t(),
           object: binary,
           request_id: binary | nil,
+          request_idempotency_key: binary | nil,
           resource_id: binary | nil,
           resource_object: binary | nil,
           type: binary
@@ -27,6 +28,7 @@ defmodule AppRecorder.Events.Event do
     field(:data, :map, default: %{})
     field(:idempotency_key, :string)
     field(:request_id, RequestId, prefix: "req")
+    field(:request_idempotency_key, :string)
     field(:resource_id, :string)
     field(:resource_object, :string)
     field(:type, :string)
@@ -44,6 +46,7 @@ defmodule AppRecorder.Events.Event do
       :data,
       :idempotency_key,
       :request_id,
+      :request_idempotency_key,
       :resource_id,
       :resource_object,
       :type
