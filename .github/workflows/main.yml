@@ -8,7 +8,7 @@ jobs:
     strategy:
       matrix:
         otp: [24.0]
-        elixir: ["1.11.2"]
+        elixir: ["1.12"]
 
     services:
       mysql:
