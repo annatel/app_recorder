@@ -31,7 +31,7 @@ defmodule AppRecorder.MixProject do
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
       {:ecto_sql, "~> 3.6"},
       {:myxql, "~> 0.4.0"},
-      {:shortcode, "~> 0.5.0"},
+      {:shortcode, "~> 0.6.0"},
       {:antl_utils_ecto, "~> 1.3.0"},
       {:jason, "~> 1.2"}
     ]
