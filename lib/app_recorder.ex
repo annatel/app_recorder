@@ -22,7 +22,7 @@ defmodule AppRecorder do
   @doc false
   @spec with_livemode? :: boolean
   def with_livemode?() do
-    Application.get_env(:app_recorder, :with_livemode, true)
+    Application.get_env(:app_recorder, :with_livemode?, true)
   end
 
   @doc false
