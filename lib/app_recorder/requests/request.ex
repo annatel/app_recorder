@@ -45,12 +45,7 @@ defmodule AppRecorder.Requests.Request do
       :source,
       :success
     ])
-    |> validate_required([
-      :id,
-      :created_at,
-      :idempotency_key,
-      :request_data
-    ])
+    |> validate_required([:id, :created_at, :request_data])
     |> validate_configurable_fields(attrs)
   end
 

@@ -1,5 +1,6 @@
 defmodule AppRecorder.Plug.RecordRequest do
-  use Plug.ErrorHandler
+  # use Plug.ErrorHandler
+
   require Logger
 
   alias Plug.Conn
@@ -26,15 +27,15 @@ defmodule AppRecorder.Plug.RecordRequest do
     |> save_current_request_data()
     |> maybe_resp_original_request()
     |> Plug.Conn.register_before_send(fn conn ->
-      record_response_data!(conn, conn.assigns.current_request)
+      record_response_data!(conn, conn.private.current_request)
 
       conn
     end)
   end
 
-  def handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
-    Conn.send_resp(conn, conn.status, "Something went wrong")
-  end
+  # def handle_errors(conn, %{kind: _kind, reason: _reason, stack: _stack}) do
+  #   Conn.send_resp(conn, conn.status, "Something went wrong")
+  # end
 
   defp get_idempotency_key(conn, idempotency_key_header) do
     case Conn.get_req_header(conn, idempotency_key_header) do
@@ -113,12 +114,13 @@ defmodule AppRecorder.Plug.RecordRequest do
 
   defp build_request_attrs(%Plug.Conn{} = conn, nil) do
     owner_id_field_name = elem(AppRecorder.owner_id_field(), 0)
+    conn = Plug.Conn.fetch_query_params(conn)
 
     attrs =
       %{
         id: Logger.metadata()[:request_id],
         created_at: DateTime.utc_now(),
-        idempotency_key: conn.private.idempotency_key,
+        idempotency_key: conn.private["idempotency_key"],
         request_data: %{
           body: request_body(conn),
           client_ip: Logger.metadata()[:remote_ip],
@@ -133,7 +135,7 @@ defmodule AppRecorder.Plug.RecordRequest do
       |> Map.put(owner_id_field_name, Map.get(conn.assigns, owner_id_field_name))
 
     if AppRecorder.with_livemode?(),
-      do: Map.put(attrs, :livemode, conn.assigns["livemode?"]),
+      do: attrs |> Map.put(:livemode, conn.assigns.livemode?),
       else: attrs
   end
 
@@ -155,14 +157,14 @@ defmodule AppRecorder.Plug.RecordRequest do
     request_content_type = request_content_type(conn)
 
     cond do
-      request_content_type =~ "application/json" ->
+      request_content_type && request_content_type =~ "application/json" ->
         Jason.encode!(conn.body_params)
 
-      request_content_type =~ "application/x-www-form-urlencoded" ->
+      request_content_type && request_content_type =~ "application/x-www-form-urlencoded" ->
         Jason.encode!(conn.body_params)
 
       true ->
-        ""
+        nil
     end
   end
 
@@ -175,19 +177,14 @@ defmodule AppRecorder.Plug.RecordRequest do
 
   defp request_headers(%Conn{} = conn) do
     ["content-type", "origin", "referer", "user-agent", "x-tls-version"]
-    |> Enum.reduce(%{}, fn header, acc ->
-      {_, value} = List.keyfind(conn.req_headers, header, 0)
-
-      Map.put(acc, header, value)
-    end)
-    |> Enum.reject(&is_nil(&1))
+    |> get_headers(conn.req_headers)
   end
 
   defp response_body(%Conn{} = conn) do
     response_content_type = response_content_type(conn)
 
     cond do
-      response_content_type =~ "application/json" ->
+      response_content_type && response_content_type =~ "application/json" ->
         Jason.encode!(conn.resp_body)
 
       true ->
@@ -216,12 +213,7 @@ defmodule AppRecorder.Plug.RecordRequest do
       @original_request_id_header,
       "request-id"
     ]
-    |> Enum.reduce(%{}, fn header, acc ->
-      {_, value} = List.keyfind(conn.resp_headers, header, 0)
-
-      Map.put(acc, header, value)
-    end)
-    |> Enum.reject(&is_nil(&1))
+    |> get_headers(conn.resp_headers)
   end
 
   defp response_status(%Request{response_data: %{status: status}}), do: status
@@ -232,5 +224,17 @@ defmodule AppRecorder.Plug.RecordRequest do
 
   defp url(%Conn{} = conn) do
     "#{conn.scheme}://#{conn.host}:#{conn.port}#{conn.request_path}"
+  end
+
+  defp get_headers(keys, headers) do
+    keys
+    |> Enum.reduce(%{}, fn key, acc ->
+      List.keyfind(headers, key, 0)
+      |> case do
+        nil -> acc
+        {_, value} -> acc |> Map.put(key, value)
+      end
+    end)
+    |> Enum.reject(&is_nil(&1))
   end
 end

@@ -5,9 +5,7 @@ defmodule AppRecorder.Factory do
   alias AppRecorder.TestRepo
 
   @spec uuid :: <<_::288>>
-  def uuid() do
-    Ecto.UUID.generate()
-  end
+  def uuid(), do: Ecto.UUID.generate()
 
   @spec id :: integer
   def id(), do: System.unique_integer([:positive])
