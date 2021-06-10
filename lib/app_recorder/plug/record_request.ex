@@ -47,7 +47,7 @@ defmodule AppRecorder.Plug.RecordRequest do
   defp set_idempotency_key(%Plug.Conn{} = conn, nil), do: conn
 
   defp set_idempotency_key(%Plug.Conn{} = conn, idempotency_key) do
-    Logger.metadata(idempotency_key: idempotency_key)
+    Logger.metadata(request_idempotency_key: idempotency_key)
 
     conn
     |> Conn.put_private(:idempotency_key, idempotency_key)

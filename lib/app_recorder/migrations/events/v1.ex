@@ -27,6 +27,7 @@ defmodule AppRecorder.Migrations.Events.V1 do
       if AppRecorder.with_livemode?(), do: add(:livemode, :boolean, null: false)
 
       add(:request_id, :binary, null: true)
+      add(:request_idempotency_key, :string, null: true)
       add(:resource_id, :string, null: true)
       add(:resource_object, :string, null: true)
 
