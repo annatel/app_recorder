@@ -35,7 +35,8 @@ defmodule AppRecorder.MixProject do
       {:shortcode, "~> 0.7.0"},
       {:antl_utils_ecto, "~> 1.3.0"},
       {:jason, "~> 1.2"},
-      {:plug_cowboy, "~> 2.0"}
+      {:plug_cowboy, "~> 2.0"},
+      {:recase, "~> 0.7"}
     ]
   end
 
