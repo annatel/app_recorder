@@ -12,8 +12,10 @@ defmodule AppRecorder.Migrations.Events.V1 do
   end
 
   defp create_events_table do
-    create table(:app_recorder_events, primary_key: false) do
-      add(:id, AppRecorder.primary_key_type(), primary_key: true)
+    primary_key_type_id? = AppRecorder.primary_key_type() == :id
+
+    create table(:app_recorder_events, primary_key: primary_key_type_id?) do
+      if not primary_key_type_id?, do: add(:id, AppRecorder.primary_key_type(), primary_key: true)
 
       add(
         elem(AppRecorder.owner_id_field(:migration), 0),
