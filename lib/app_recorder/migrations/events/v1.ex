@@ -15,7 +15,9 @@ defmodule AppRecorder.Migrations.Events.V1 do
     create table(:app_recorder_events, primary_key: false) do
       add(:id, AppRecorder.primary_key_type(), primary_key: true)
 
-      add(elem(AppRecorder.owner_id_field(), 0), elem(AppRecorder.owner_id_field(), 1),
+      add(
+        elem(AppRecorder.owner_id_field(:migration), 0),
+        elem(AppRecorder.owner_id_field(:migration), 1),
         null: false
       )
 
@@ -39,7 +41,7 @@ defmodule AppRecorder.Migrations.Events.V1 do
       add(:object, :string, null: false, default: "event")
     end
 
-    create(index(:app_recorder_events, [elem(AppRecorder.owner_id_field(), 0)]))
+    create(index(:app_recorder_events, [elem(AppRecorder.owner_id_field(:migration), 0)]))
     create(index(:app_recorder_events, [:created_at]))
 
     if AppRecorder.with_livemode?(), do: create(index(:app_recorder_events, [:livemode]))

@@ -14,9 +14,17 @@ defmodule AppRecorder do
   end
 
   @doc false
-  @spec owner_id_field :: tuple
-  def owner_id_field() do
-    Application.get_env(:app_recorder, :owner_id_field, {:owner_id, :string, []})
+  @spec owner_id_field(atom) :: tuple
+  def owner_id_field(:migration) do
+    Application.get_env(:app_recorder, :owner_id_field, migration: {:owner_id, :binary_id})[
+      :migration
+    ]
+  end
+
+  def owner_id_field(:schema) do
+    Application.get_env(:app_recorder, :owner_id_field, schema: {:owner_id, :binary_id, []})[
+      :schema
+    ]
   end
 
   @doc false

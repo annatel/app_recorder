@@ -19,7 +19,9 @@ defmodule AppRecorder.Migrations.Requests.V1 do
         add(:id, :binary, primary_key: true, size: 15)
       end
 
-      add(elem(AppRecorder.owner_id_field(), 0), elem(AppRecorder.owner_id_field(), 1),
+      add(
+        elem(AppRecorder.owner_id_field(:migration), 0),
+        elem(AppRecorder.owner_id_field(:migration), 1),
         null: false
       )
 
@@ -38,7 +40,7 @@ defmodule AppRecorder.Migrations.Requests.V1 do
       add(:object, :string, null: false, default: "request")
     end
 
-    create(index(:app_recorder_requests, [elem(AppRecorder.owner_id_field(), 0)]))
+    create(index(:app_recorder_requests, [elem(AppRecorder.owner_id_field(:migration), 0)]))
     create(index(:app_recorder_requests, [:created_at]))
     create(index(:app_recorder_requests, [:idempotency_key]))
 

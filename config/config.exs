@@ -18,7 +18,7 @@ if(Mix.env() == :test) do
 
   config :app_recorder,
     primary_key_type: :binary_id,
-    owner_id_field: {:owner_id, :binary_id, []},
+    owner_id_field: [migration: {:owner_id, :binary_id}, schema: {:owner_id, :binary_id, []}],
     with_livemode?: true,
     with_sequence?: true
 end

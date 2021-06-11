@@ -4,9 +4,9 @@ defmodule AppRecorder.Requests.RequestSchema do
       import Ecto.Schema
 
       field(
-        elem(AppRecorder.owner_id_field(), 0),
-        elem(AppRecorder.owner_id_field(), 1),
-        elem(AppRecorder.owner_id_field(), 2)
+        elem(AppRecorder.owner_id_field(:schema), 0),
+        elem(AppRecorder.owner_id_field(:schema), 1),
+        elem(AppRecorder.owner_id_field(:schema), 2)
       )
 
       if AppRecorder.with_livemode?() do
@@ -22,7 +22,7 @@ defmodule AppRecorder.Requests.RequestSchema do
       import AppRecorder.Requests.RequestSchema
 
       defp validate_configurable_fields(%Ecto.Changeset{} = changeset, attrs) do
-        fields = [elem(AppRecorder.owner_id_field(), 0)]
+        fields = [elem(AppRecorder.owner_id_field(:schema), 0)]
         fields = if AppRecorder.with_livemode?(), do: [:livemode | fields], else: fields
 
         changeset

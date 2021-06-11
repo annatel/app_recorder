@@ -20,11 +20,11 @@ defmodule AppRecorder.Factory.Request do
 
       defp put_owner_id(%Request{} = request) do
         owner_id_value =
-          if elem(AppRecorder.owner_id_field(), 1) == :binary_id,
+          if elem(AppRecorder.owner_id_field(:schema), 1) == :binary_id,
             do: uuid(),
             else: id()
 
-        request |> Map.put(elem(AppRecorder.owner_id_field(), 0), owner_id_value)
+        request |> Map.put(elem(AppRecorder.owner_id_field(:schema), 0), owner_id_value)
       end
 
       defp maybe_put_livemode(%Request{} = request) do

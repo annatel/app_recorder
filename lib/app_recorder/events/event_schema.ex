@@ -4,9 +4,9 @@ defmodule AppRecorder.Events.EventSchema do
       import Ecto.Schema
 
       field(
-        elem(AppRecorder.owner_id_field(), 0),
-        elem(AppRecorder.owner_id_field(), 1),
-        elem(AppRecorder.owner_id_field(), 2)
+        elem(AppRecorder.owner_id_field(:schema), 0),
+        elem(AppRecorder.owner_id_field(:schema), 1),
+        elem(AppRecorder.owner_id_field(:schema), 2)
       )
 
       if AppRecorder.with_livemode?() do
@@ -31,7 +31,7 @@ defmodule AppRecorder.Events.EventSchema do
       @primary_key {:id, @shortcode_types[@primary_key_type], prefix: "evt", autogenerate: true}
 
       defp validate_configurable_fields(%Ecto.Changeset{} = changeset, attrs) do
-        fields = [elem(AppRecorder.owner_id_field(), 0)]
+        fields = [elem(AppRecorder.owner_id_field(:schema), 0)]
         fields = if AppRecorder.with_livemode?(), do: [:livemode | fields], else: fields
         fields = if AppRecorder.with_sequence?(), do: [:sequence | fields], else: fields
 

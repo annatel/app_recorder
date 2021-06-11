@@ -24,11 +24,11 @@ defmodule AppRecorder.Test.Factories do
 
   defp put_owner_id(%Event{} = event) do
     owner_id_value =
-      if elem(AppRecorder.owner_id_field(), 1) == :binary_id,
+      if elem(AppRecorder.owner_id_field(:schema), 1) == :binary_id,
         do: Ecto.UUID.generate(),
         else: System.unique_integer([:positive])
 
-    event |> Map.put(elem(AppRecorder.owner_id_field(), 0), owner_id_value)
+    event |> Map.put(elem(AppRecorder.owner_id_field(:schema), 0), owner_id_value)
   end
 
   defp maybe_put_sequence(%Event{} = event) do

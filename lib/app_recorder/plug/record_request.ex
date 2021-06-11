@@ -113,7 +113,7 @@ defmodule AppRecorder.Plug.RecordRequest do
   end
 
   defp build_request_attrs(%Plug.Conn{} = conn, nil) do
-    owner_id_field_name = elem(AppRecorder.owner_id_field(), 0)
+    owner_id_field_name = elem(AppRecorder.owner_id_field(:schema), 0)
     conn = Plug.Conn.fetch_query_params(conn)
 
     attrs =
