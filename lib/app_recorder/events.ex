@@ -24,15 +24,17 @@ defmodule AppRecorder.Events do
 
     query = event_queryable(opts)
 
-    count = query |> AppRecorder.repo().aggregate(:count, :id)
+    try do
+      events =
+        query
+        |> EventQueryable.paginate(page_number, page_size)
+        |> order_by(^order_by_fields)
+        |> AppRecorder.repo().all()
 
-    events =
-      query
-      |> EventQueryable.paginate(page_number, page_size)
-      |> order_by(^order_by_fields)
-      |> AppRecorder.repo().all()
-
-    %{data: events, total: count}
+      %{total: AppRecorder.repo().aggregate(query, :count, :id), data: events}
+    rescue
+      Ecto.Query.CastError -> %{total: 0, data: []}
+    end
   end
 
   @doc ~S"""

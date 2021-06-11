@@ -19,15 +19,17 @@ defmodule AppRecorder.Requests do
 
     query = request_queryable(opts)
 
-    count = query |> AppRecorder.repo().aggregate(:count, :id)
+    try do
+      requests =
+        query
+        |> order_by(^order_by_fields)
+        |> RequestQueryable.paginate(page_number, page_size)
+        |> AppRecorder.repo().all()
 
-    requests =
-      query
-      |> order_by(^order_by_fields)
-      |> RequestQueryable.paginate(page_number, page_size)
-      |> AppRecorder.repo().all()
-
-    %{data: requests, total: count}
+      %{total: AppRecorder.repo().aggregate(query, :count, :id), data: requests}
+    rescue
+      Ecto.Query.CastError -> %{total: 0, data: []}
+    end
   end
 
   @spec record_request!(map) :: Request.t()

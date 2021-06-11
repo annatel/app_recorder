@@ -182,14 +182,9 @@ defmodule AppRecorder.EventsTest do
       assert %Event{id: ^id} = Events.get_event(id)
     end
 
-    test "when the id is not right prefixed, returns nil" do
-      %{id: id} = insert!(:event)
-      wrong_prefixed_id = String.replace(id, "evt", "prefix")
-      assert is_nil(Events.get_event(wrong_prefixed_id))
-    end
-
     test "when then event does not exist, returns nil" do
       assert is_nil(Events.get_event(uuid()))
+      assert is_nil(Events.get_event(shortcode_uuid("evt")))
     end
   end
 

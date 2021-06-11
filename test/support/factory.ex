@@ -15,6 +15,9 @@ defmodule AppRecorder.Factory do
     AppRecorder.RequestId.generate_request_id("req")
   end
 
+  @spec shortcode_uuid(nil | binary) :: binary
+  def shortcode_uuid(prefix \\ nil), do: uuid() |> Shortcode.to_shortcode!(prefix)
+
   @spec utc_now :: DateTime.t()
   def utc_now(), do: DateTime.utc_now() |> DateTime.truncate(:second)
 
