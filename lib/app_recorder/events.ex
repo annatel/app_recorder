@@ -144,7 +144,8 @@ defmodule AppRecorder.Events do
     |> Ecto.Changeset.validate_inclusion(:type, allowed_event_types)
   end
 
-  defp event_queryable(opts) do
+  @spec event_queryable(keyword) :: Ecto.Queryable.t()
+  def event_queryable(opts) do
     filters = Keyword.get(opts, :filters, [])
 
     EventQueryable.queryable()
