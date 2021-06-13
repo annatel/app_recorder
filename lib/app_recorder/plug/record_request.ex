@@ -235,6 +235,5 @@ defmodule AppRecorder.Plug.RecordRequest do
         {_, value} -> acc |> Map.put(key, value)
       end
     end)
-    |> Enum.reject(&is_nil(&1))
   end
 end

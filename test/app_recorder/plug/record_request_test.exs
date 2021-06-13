@@ -30,6 +30,7 @@ defmodule AppRecorder.Plug.RecordRequestTest do
       conn(:get, "/", "")
       |> Plug.Conn.assign(:livemode?, livemode)
       |> Plug.Conn.assign(:owner_id, owner_id)
+      |> Plug.Conn.put_req_header("content-type", "plain/text")
       |> Plug.Conn.fetch_query_params()
       |> PlugWithRecordRequest.call([])
 
@@ -41,7 +42,7 @@ defmodule AppRecorder.Plug.RecordRequestTest do
       assert request.request_data == %{
                "body" => nil,
                "client_ip" => nil,
-               "headers" => [],
+               "headers" => %{"content-type" => "plain/text"},
                "method" => "GET",
                "path" => "/",
                "query_params" => %{},
@@ -49,7 +50,7 @@ defmodule AppRecorder.Plug.RecordRequestTest do
                "url" => "http://www.example.com/"
              }
 
-      assert request.response_data == %{"body" => "Welcome", "headers" => [], "status" => 200}
+      assert request.response_data == %{"body" => "Welcome", "headers" => %{}, "status" => 200}
     end
   end
 end
