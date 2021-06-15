@@ -8,11 +8,19 @@ defmodule AppRecorder.EventsTest do
   alias AppRecorder.Events.Event
 
   describe "list_events/1" do
+    test "list events" do
+      %{id: id_1} = insert!(:event)
+
+      assert [%Event{id: ^id_1}] = Events.list_events()
+    end
+  end
+
+  describe "paginate_events/3" do
     test "returns the list of events ordered by the sequence descending" do
       %{id: id_1} = insert!(:event)
 
       assert %{data: [%Event{id: ^id_1}], total: 1} = Events.paginate_events(100, 1)
-      # assert %{data: [], total: 1} = Events.paginate_events(100, 2)
+      assert %{data: [], total: 1} = Events.paginate_events(100, 2)
     end
 
     test "order_by" do

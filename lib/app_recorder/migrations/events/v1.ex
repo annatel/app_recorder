@@ -30,6 +30,7 @@ defmodule AppRecorder.Migrations.Events.V1 do
 
       if AppRecorder.with_livemode?(), do: add(:livemode, :boolean, null: false)
 
+      add(:origin, :string, null: true)
       add(:request_id, :binary, null: true)
       add(:request_idempotency_key, :string, null: true)
       add(:resource_id, :string, null: true)
@@ -37,6 +38,8 @@ defmodule AppRecorder.Migrations.Events.V1 do
 
       if AppRecorder.with_sequence?(), do: add(:sequence, :integer, null: false)
 
+      add(:source, :string, null: true)
+      add(:source_event_id, AppRecorder.primary_key_type(), null: true)
       add(:type, :string, null: false)
 
       timestamps(updated_at: false)
@@ -47,12 +50,14 @@ defmodule AppRecorder.Migrations.Events.V1 do
     create(index(:app_recorder_events, [:created_at]))
 
     if AppRecorder.with_livemode?(), do: create(index(:app_recorder_events, [:livemode]))
+    create(index(:app_recorder_events, [:origin]))
 
     create(index(:app_recorder_events, [:resource_object]))
     create(index(:app_recorder_events, [:resource_id]))
 
     if AppRecorder.with_sequence?(), do: create(index(:app_recorder_events, [:sequence]))
-
+    create(index(:app_recorder_events, [:source]))
+    create(index(:app_recorder_events, [:source_event_id]))
     create(index(:app_recorder_events, [:type]))
   end
 

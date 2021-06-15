@@ -12,10 +12,13 @@ defmodule AppRecorder.Events.Event do
           idempotency_key: binary | nil,
           inserted_at: DateTime.t(),
           object: binary,
+          origin: binary | nil,
           request_id: binary | nil,
           request_idempotency_key: binary | nil,
           resource_id: binary | nil,
           resource_object: binary | nil,
+          source: binary | nil,
+          source_event_id: binary | nil,
           type: binary
         }
 
@@ -27,10 +30,12 @@ defmodule AppRecorder.Events.Event do
     field(:created_at, :utc_datetime)
     field(:data, :map, default: %{})
     field(:idempotency_key, :string)
+    field(:origin, :string)
     field(:request_id, RequestId, prefix: "req")
     field(:request_idempotency_key, :string)
     field(:resource_id, :string)
     field(:resource_object, :string)
+    field(:source, :string)
     field(:type, :string)
 
     timestamps(updated_at: false)
@@ -45,10 +50,12 @@ defmodule AppRecorder.Events.Event do
       :created_at,
       :data,
       :idempotency_key,
+      :origin,
       :request_id,
       :request_idempotency_key,
       :resource_id,
       :resource_object,
+      :source,
       :type
     ])
     |> validate_required([:created_at, :data, :type])
