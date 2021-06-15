@@ -21,15 +21,15 @@ defmodule AppRecorder.Migrations.OutgoingRequests.V1 do
 
       add(:destination, :string, null: false)
       add(:client_error_message, :string, null: true)
-      add(:requested_at, :utc_datetime, null: false)
       add(:request_body, :string, null: true)
       add(:request_headers, :map, null: true)
       add(:request_method, :string, null: false)
       add(:request_url, :string, null: false)
-      add(:responded_at, :utc_datetime, null: true)
+      add(:requested_at, :utc_datetime, null: false)
       add(:response_http_status, :int, null: true)
       add(:response_headers, :map, null: true)
       add(:response_body, :string, null: true)
+      add(:responded_at, :utc_datetime, null: true)
       add(:source, :string, null: false)
       add(:success, :boolean, null: true)
 

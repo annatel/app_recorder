@@ -69,11 +69,11 @@ defmodule AppRecorder.OutgoingRequestsTest do
 
       refute is_nil(outgoing_request.id)
       assert outgoing_request.destination == outgoing_request_params.destination
-      assert outgoing_request.requested_at == outgoing_request_params.requested_at
       assert outgoing_request.request_body == outgoing_request_params.request_body
       assert outgoing_request.request_headers == outgoing_request_params.request_headers
       assert outgoing_request.request_method == outgoing_request_params.request_method
       assert outgoing_request.request_url == outgoing_request_params.request_url
+      assert outgoing_request.requested_at == outgoing_request_params.requested_at
       assert outgoing_request.source == outgoing_request_params.source
     end
 

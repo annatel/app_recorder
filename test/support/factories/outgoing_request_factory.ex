@@ -8,13 +8,13 @@ defmodule AppRecorder.Factory.OutgoingRequest do
           destination: "destination_#{System.unique_integer()}",
           client_error_message: "client_error_message_#{System.unique_integer()}",
           id: request_id("out_req"),
-          requested_at: utc_now(),
           request_body: "request_body_#{System.unique_integer()}",
           request_method: "GET",
           request_url: "request_url_#{System.unique_integer()}",
-          responded_at: utc_now(),
+          requested_at: utc_now(),
           response_http_status: 200,
           response_body: "response_body_#{System.unique_integer()}",
+          responded_at: utc_now(),
           source: "source_#{System.unique_integer()}",
           success: true
         }

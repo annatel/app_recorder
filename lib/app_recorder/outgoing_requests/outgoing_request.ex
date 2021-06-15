@@ -11,14 +11,14 @@ defmodule AppRecorder.OutgoingRequests.OutgoingRequest do
           id: binary,
           inserted_at: DateTime.t(),
           object: binary,
-          requested_at: DateTime.t(),
           request_body: binary | nil,
           request_headers: map,
           request_url: binary,
-          responded_at: DateTime.t(),
+          requested_at: DateTime.t(),
           response_http_status: integer | nil,
           response_headers: map,
           response_body: binary | nil,
+          responded_at: DateTime.t(),
           source: binary,
           success: boolean
         }
@@ -27,15 +27,15 @@ defmodule AppRecorder.OutgoingRequests.OutgoingRequest do
   schema "app_recorder_outgoing_requests" do
     field(:destination, :string)
     field(:client_error_message, :string)
-    field(:requested_at, :utc_datetime)
     field(:request_body, :string)
     field(:request_headers, :map, default: %{})
     field(:request_method, :string)
     field(:request_url, :string)
-    field(:responded_at, :utc_datetime)
+    field(:requested_at, :utc_datetime)
     field(:response_http_status, :integer)
     field(:response_headers, :map, default: %{})
     field(:response_body, :string)
+    field(:responded_at, :utc_datetime)
     field(:source, :string)
     field(:success, :boolean)
 
@@ -49,19 +49,19 @@ defmodule AppRecorder.OutgoingRequests.OutgoingRequest do
     |> cast(attrs, [
       :id,
       :destination,
-      :requested_at,
       :request_body,
       :request_headers,
       :request_method,
       :request_url,
+      :requested_at,
       :source
     ])
     |> validate_required([
       :id,
       :destination,
-      :requested_at,
       :request_method,
       :request_url,
+      :requested_at,
       :source
     ])
   end
@@ -71,10 +71,10 @@ defmodule AppRecorder.OutgoingRequests.OutgoingRequest do
     request
     |> cast(attrs, [
       :client_error_message,
-      :responded_at,
       :response_http_status,
       :response_headers,
       :response_body,
+      :responded_at,
       :success
     ])
     |> validate_required([:success])
