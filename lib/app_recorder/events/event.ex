@@ -1,7 +1,7 @@
 defmodule AppRecorder.Events.Event do
   use AppRecorder.Events.EventSchema
 
-  import Ecto.Changeset, only: [cast: 3, validate_required: 2]
+  import Ecto.Changeset, only: [cast: 3, unique_constraint: 2, validate_required: 2]
 
   alias AppRecorder.Extensions.Ecto.Types.RequestId
 
@@ -59,6 +59,7 @@ defmodule AppRecorder.Events.Event do
       :type
     ])
     |> validate_required([:created_at, :data, :type])
+    |> unique_constraint([:idempotency_key, :source])
     |> validate_configurable_fields(attrs)
   end
 end

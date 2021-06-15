@@ -48,6 +48,7 @@ defmodule AppRecorder.Migrations.Events.V1 do
 
     create(index(:app_recorder_events, [elem(AppRecorder.owner_id_field(:migration), 0)]))
     create(index(:app_recorder_events, [:created_at]))
+    create(unique_index(:app_recorder_events, [:idempotency_key, :source]))
 
     if AppRecorder.with_livemode?(), do: create(index(:app_recorder_events, [:livemode]))
     create(index(:app_recorder_events, [:origin]))

@@ -99,11 +99,30 @@ defmodule AppRecorder.EventsTest do
       assert event_2.sequence > event_1.sequence
     end
 
-    test "when an event already exists with the idempotency_key, no matter the other params, do not create a new event and returns already recorded event" do
+    test "when an event already exists with the idempotency_key from the same source, no matter the other params, do not create a new event and returns already recorded event" do
+      %{id: event_id} = event = insert!(:event)
+
+      event_params =
+        params_for(:event, idempotency_key: event.idempotency_key, source: event.source)
+
+      assert %{id: ^event_id} = Events.record_event!(event_params)
+    end
+
+    test "when an event already exists with the idempotency_key when the source is nil, no matter the other params, do not create a new event and returns already recorded event" do
+      %{id: event_id} = event = insert!(:event, source: nil)
+
+      event_params =
+        params_for(:event, idempotency_key: event.idempotency_key, source: event.source)
+
+      assert %{id: ^event_id} = Events.record_event!(event_params)
+    end
+
+    test "when an event already exists with the idempotency_key from another source, record a new event" do
       %{id: event_id} = event = insert!(:event)
       event_params = params_for(:event, idempotency_key: event.idempotency_key)
 
-      assert %{id: ^event_id} = Events.record_event!(event_params)
+      assert %{id: new_event_id} = Events.record_event!(event_params)
+      assert new_event_id != event_id
     end
 
     test "request_id can be set from attrs" do

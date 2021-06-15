@@ -59,16 +59,20 @@ defmodule AppRecorder.Events do
 
     Multi.new()
     |> Multi.put(:idempotency_key, Map.get(attrs, :idempotency_key))
-    |> Multi.run(:lock_idempotency_key, fn
-      _, %{idempotency_key: nil} -> {:ok, nil}
-      _, %{idempotency_key: idempotency_key} -> {:ok, Padlock.Mutexes.lock!(idempotency_key)}
+    |> Multi.put(:source, Map.get(attrs, :source))
+    |> Multi.run(:lock_idempotency_key_by_source, fn
+      _, %{idempotency_key: nil} ->
+        {:ok, nil}
+
+      _, %{idempotency_key: idempotency_key, source: source} ->
+        {:ok, Padlock.Mutexes.lock!("#{source}_#{idempotency_key}")}
     end)
     |> Multi.run(:original_event, fn
       _, %{idempotency_key: nil} ->
         {:ok, nil}
 
-      _, %{idempotency_key: idempotency_key} ->
-        {:ok, get_event_by(idempotency_key: idempotency_key)}
+      _, %{idempotency_key: idempotency_key, source: source} ->
+        {:ok, get_event_by([idempotency_key: idempotency_key], filters: [source: source])}
     end)
     |> Multi.run(:event, fn
       _, %{original_event: %Event{} = event} ->
@@ -138,10 +142,15 @@ defmodule AppRecorder.Events do
     |> AppRecorder.repo().one!()
   end
 
-  defp get_event_by(idempotency_key: nil), do: nil
+  defp get_event_by(filters, opts \\ [])
 
-  defp get_event_by(idempotency_key: idempotency_key) do
-    [filters: [idempotency_key: idempotency_key]]
+  defp get_event_by([idempotency_key: nil], _), do: nil
+
+  defp get_event_by([idempotency_key: idempotency_key], opts) do
+    filters = opts |> Keyword.get(:filters, []) |> Keyword.put(:idempotency_key, idempotency_key)
+
+    opts
+    |> Keyword.put(:filters, filters)
     |> event_queryable()
     |> AppRecorder.repo().one()
   end
