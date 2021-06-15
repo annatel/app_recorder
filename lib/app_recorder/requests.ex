@@ -7,7 +7,9 @@ defmodule AppRecorder.Requests do
 
   @spec paginate_requests(pos_integer, pos_integer, keyword) :: %{
           data: [Request.t()],
-          total: integer
+          total: integer,
+          page_size: integer,
+          page_number: integer
         }
   def paginate_requests(page_size, page_number, opts \\ [])
       when is_integer(page_number) and is_integer(page_size) do
@@ -21,10 +23,13 @@ defmodule AppRecorder.Requests do
 
       %{
         data: requests,
+        page_number: page_number,
+        page_size: page_size,
         total: AppRecorder.repo().aggregate(query, :count, :id)
       }
     rescue
-      Ecto.Query.CastError -> %{total: 0, data: []}
+      Ecto.Query.CastError ->
+        %{data: [], page_number: page_number, page_size: page_size, total: 0}
     end
   end
 

@@ -10,7 +10,7 @@ defmodule AppRecorder.Factory.Event do
           data: %{key: "value"},
           idempotency_key: "idempotency_key_#{System.unique_integer()}",
           origin: "origin_#{System.unique_integer()}",
-          request_id: request_id(),
+          request_id: request_id("req"),
           request_idempotency_key: "request_idempotency_key_#{System.unique_integer()}",
           resource_id: "resource_id_#{System.unique_integer()}",
           resource_object: "resource_object_#{System.unique_integer()}",

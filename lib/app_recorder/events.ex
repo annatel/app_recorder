@@ -24,7 +24,9 @@ defmodule AppRecorder.Events do
   """
   @spec paginate_events(pos_integer, pos_integer, keyword) :: %{
           data: [Event.t()],
-          total: pos_integer
+          total: integer,
+          page_size: integer,
+          page_number: integer
         }
   def paginate_events(page_size, page_number, opts \\ [])
       when is_integer(page_number) and is_integer(page_size) do
@@ -38,10 +40,13 @@ defmodule AppRecorder.Events do
 
       %{
         data: events,
+        page_number: page_number,
+        page_size: page_size,
         total: AppRecorder.repo().aggregate(query, :count, :id)
       }
     rescue
-      Ecto.Query.CastError -> %{data: [], total: 0}
+      Ecto.Query.CastError ->
+        %{data: [], page_number: page_number, page_size: page_size, total: 0}
     end
   end
 

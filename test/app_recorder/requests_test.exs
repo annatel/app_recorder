@@ -5,12 +5,15 @@ defmodule AppRecorder.RequestsTest do
   alias AppRecorder.Requests
   alias AppRecorder.Requests.Request
 
-  describe "list_requests/1" do
+  describe "paginate_requests/1" do
     test "returns the list of requests ordered by the id descending" do
       %{id: id_1} = insert!(:request)
 
-      assert %{data: [%Request{id: ^id_1}], total: 1} = Requests.paginate_requests(100, 1)
-      assert %{data: [], total: 1} = Requests.paginate_requests(100, 2)
+      assert %{data: [%Request{id: ^id_1}], page_size: 100, page_number: 1, total: 1} =
+               Requests.paginate_requests(100, 1)
+
+      assert %{data: [], page_size: 100, page_number: 2, total: 1} =
+               Requests.paginate_requests(100, 2)
     end
 
     test "order_by" do
@@ -54,7 +57,7 @@ defmodule AppRecorder.RequestsTest do
 
   describe "record_request!/3" do
     test "when data is valid, creates an request" do
-      request_id = request_id()
+      request_id = request_id("req")
       request_params = params_for(:request, id: request_id)
 
       request = Requests.record_request!(request_params)
@@ -92,6 +95,7 @@ defmodule AppRecorder.RequestsTest do
 
     test "when then request does not exist, returns nil" do
       assert is_nil(Requests.get_request(request_id()))
+      assert is_nil(Requests.get_request(request_id("req")))
     end
   end
 

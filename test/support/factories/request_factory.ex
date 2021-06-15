@@ -6,7 +6,7 @@ defmodule AppRecorder.Factory.Request do
       def build(:request, attrs) do
         %Request{
           created_at: utc_now(),
-          id: request_id(),
+          id: request_id("req"),
           idempotency_key: "idempotency_key_#{System.unique_integer()}",
           request_data: %{key: "value"},
           response_data: %{key: "value"},

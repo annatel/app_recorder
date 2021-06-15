@@ -72,7 +72,7 @@ defmodule AppRecorder.EventsTest do
 
   describe "record_event!/3" do
     test "when data is valid, creates an event" do
-      request_id = request_id()
+      request_id = request_id("req")
       request_idempotency_key = "request_idempotency_key"
       Logger.metadata(request_id: request_id)
       Logger.metadata(request_idempotency_key: request_idempotency_key)
@@ -126,7 +126,7 @@ defmodule AppRecorder.EventsTest do
     end
 
     test "request_id can be set from attrs" do
-      request_id = request_id()
+      request_id = request_id("req")
       Logger.metadata(request_id: nil)
       event_params = params_for(:event, request_id: request_id)
 
@@ -150,7 +150,7 @@ defmodule AppRecorder.EventsTest do
 
   describe "multi/4" do
     test "create a multi operation with attrs" do
-      request_id = request_id()
+      request_id = request_id("req")
       request_idempotency_key = "request_idempotency_key"
       Logger.metadata(request_id: request_id)
       Logger.metadata(request_idempotency_key: request_idempotency_key)

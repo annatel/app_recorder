@@ -74,10 +74,12 @@ defmodule AppRecorder.RequestId do
   end
 
   def to_binary(request_id, prefix) when is_binary(request_id) do
+    prefix_with_separator = prefix <> @prefix_separator
+
     request_id
-    |> String.split(@prefix_separator, parts: 2)
+    |> String.split_at(String.length(prefix_with_separator))
     |> case do
-      [^prefix, data] -> to_binary(data, nil)
+      {^prefix_with_separator, data} -> to_binary(data, nil)
       _ -> :error
     end
   end

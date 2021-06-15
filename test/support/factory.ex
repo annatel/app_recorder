@@ -1,6 +1,7 @@
 defmodule AppRecorder.Factory do
   use AppRecorder.Factory.Event
   use AppRecorder.Factory.Request
+  use AppRecorder.Factory.OutgoingRequest
 
   alias AppRecorder.TestRepo
 
@@ -10,9 +11,9 @@ defmodule AppRecorder.Factory do
   @spec id :: integer
   def id(), do: System.unique_integer([:positive])
 
-  @spec request_id() :: binary
-  def request_id() do
-    AppRecorder.RequestId.generate_request_id("req")
+  @spec request_id(nil | binary) :: binary
+  def request_id(prefix \\ nil) do
+    AppRecorder.RequestId.generate_request_id(prefix)
   end
 
   @spec shortcode_uuid(nil | binary) :: binary
