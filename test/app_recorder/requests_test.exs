@@ -9,17 +9,18 @@ defmodule AppRecorder.RequestsTest do
     test "returns the list of requests ordered by the id descending" do
       %{id: id_1} = insert!(:request)
 
-      assert %{data: [%Request{id: ^id_1}], total: 1} = Requests.list_requests()
+      assert %{data: [%Request{id: ^id_1}], total: 1} = Requests.paginate_requests(100, 1)
+      assert %{data: [], total: 1} = Requests.paginate_requests(100, 2)
     end
 
     test "order_by" do
       %{id: id1} = insert!(:request)
       %{id: id2} = insert!(:request)
 
-      assert %{data: [%{id: ^id2}, %{id: ^id1}]} = Requests.list_requests()
+      assert %{data: [%{id: ^id2}, %{id: ^id1}]} = Requests.paginate_requests(100, 1)
 
       assert %{data: [%{id: ^id1}, %{id: ^id2}]} =
-               Requests.list_requests(order_by_fields: [asc: :id])
+               Requests.paginate_requests(100, 1, order_by_fields: [asc: :id])
     end
 
     test "filters" do
@@ -34,7 +35,7 @@ defmodule AppRecorder.RequestsTest do
         [success: request.success]
       ]
       |> Enum.each(fn filter ->
-        assert %{data: [_request], total: 1} = Requests.list_requests(filters: filter)
+        assert %{data: [_request], total: 1} = Requests.paginate_requests(100, 1, filters: filter)
       end)
 
       [
@@ -46,7 +47,7 @@ defmodule AppRecorder.RequestsTest do
         [success: !request.success]
       ]
       |> Enum.each(fn filter ->
-        assert %{data: [], total: 0} = Requests.list_requests(filters: filter)
+        assert %{data: [], total: 0} = Requests.paginate_requests(100, 1, filters: filter)
       end)
     end
   end

@@ -34,7 +34,7 @@ defmodule AppRecorder.Plug.RecordRequestTest do
       |> Plug.Conn.fetch_query_params()
       |> PlugWithRecordRequest.call([])
 
-      %{data: [request]} = AppRecorder.Requests.list_requests()
+      %{data: [request]} = AppRecorder.Requests.paginate_requests(100, 1)
       assert request.id == Logger.metadata()[:request_id]
       assert request.livemode == livemode
       assert request.owner_id == owner_id

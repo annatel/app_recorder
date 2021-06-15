@@ -3,37 +3,45 @@ defmodule AppRecorder.Events do
   The requests context.
   """
 
-  import Ecto.Query, only: [order_by: 2]
-
   alias Ecto.Multi
 
   alias AppRecorder.Events.{Event, EventQueryable}
 
-  @default_page_number 1
-  @default_page_size 100
-
   @doc ~S"""
   List all events
   """
-
-  @spec list_events(keyword) :: %{data: [Event.t()], total: integer}
+  @spec list_events(keyword) :: [Event.t()]
   def list_events(opts \\ []) do
-    page_number = Keyword.get(opts, :page_number, @default_page_number)
-    page_size = Keyword.get(opts, :page_size, @default_page_size)
-    order_by_fields = list_order_by_fields(opts)
-
-    query = event_queryable(opts)
-
     try do
+      opts |> event_queryable() |> AppRecorder.repo().all()
+    rescue
+      Ecto.Query.CastError -> []
+    end
+  end
+
+  @doc ~S"""
+  Paginate events
+  """
+  @spec paginate_events(pos_integer, pos_integer, keyword) :: %{
+          data: [Event.t()],
+          total: pos_integer
+        }
+  def paginate_events(page_size, page_number, opts \\ [])
+      when is_integer(page_number) and is_integer(page_size) do
+    try do
+      query = opts |> event_queryable()
+
       events =
         query
-        |> EventQueryable.paginate(page_number, page_size)
-        |> order_by(^order_by_fields)
+        |> EventQueryable.paginate(page_size, page_number)
         |> AppRecorder.repo().all()
 
-      %{total: AppRecorder.repo().aggregate(query, :count, :id), data: events}
+      %{
+        data: events,
+        total: AppRecorder.repo().aggregate(query, :count, :id)
+      }
     rescue
-      Ecto.Query.CastError -> %{total: 0, data: []}
+      Ecto.Query.CastError -> %{data: [], total: 0}
     end
   end
 
@@ -149,17 +157,15 @@ defmodule AppRecorder.Events do
   @spec event_queryable(keyword) :: Ecto.Queryable.t()
   def event_queryable(opts) do
     filters = Keyword.get(opts, :filters, [])
+    order_bys = Keyword.get(opts, :order_by_fields, default_order_by_fields())
 
     EventQueryable.queryable()
     |> EventQueryable.filter(filters)
+    |> EventQueryable.order_by(order_bys)
   end
 
-  defp list_order_by_fields(opts) do
-    Keyword.get(opts, :order_by_fields, [])
-    |> case do
-      [] -> if AppRecorder.with_sequence?(), do: [desc: :sequence], else: [desc: :id]
-      [_ | _] = order_by_fields -> order_by_fields
-    end
+  defp default_order_by_fields() do
+    if AppRecorder.with_sequence?(), do: [desc: :sequence], else: [desc: :id]
   end
 
   defp maybe_put_sequence(attrs) do

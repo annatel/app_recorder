@@ -17,10 +17,9 @@ defmodule AppRecorder.Test.Assertions do
   def assert_event_recorded(attrs \\ %{})
 
   def assert_event_recorded(%{data: %{} = data} = attrs) do
-    %{total: total, data: events} =
-      Events.list_events(filter: attrs |> Map.delete(:data) |> Enum.to_list())
+    events = Events.list_events(filter: attrs |> Map.delete(:data) |> Enum.to_list())
 
-    assert total != 0, message(attrs)
+    assert length(events) != 0, message(attrs)
 
     assert Enum.filter(events, fn event ->
              subset?(data, event.data |> Recase.Enumerable.atomize_keys())
@@ -29,9 +28,9 @@ defmodule AppRecorder.Test.Assertions do
   end
 
   def assert_event_recorded(attrs) do
-    %{total: total} = Events.list_events(filter: attrs |> Enum.to_list())
+    events = Events.list_events(filter: attrs |> Enum.to_list())
 
-    assert total != 0, message(attrs)
+    assert length(events) != 0, message(attrs)
   end
 
   defp subset?(a, b) do

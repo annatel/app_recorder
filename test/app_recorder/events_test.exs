@@ -11,17 +11,18 @@ defmodule AppRecorder.EventsTest do
     test "returns the list of events ordered by the sequence descending" do
       %{id: id_1} = insert!(:event)
 
-      assert %{data: [%Event{id: ^id_1}], total: 1} = Events.list_events()
+      assert %{data: [%Event{id: ^id_1}], total: 1} = Events.paginate_events(100, 1)
+      # assert %{data: [], total: 1} = Events.paginate_events(100, 2)
     end
 
     test "order_by" do
       %{id: id1} = insert!(:event, sequence: 1)
       %{id: id2} = insert!(:event, sequence: 2)
 
-      assert %{data: [%{id: ^id2}, %{id: ^id1}]} = Events.list_events()
+      assert %{data: [%{id: ^id2}, %{id: ^id1}]} = Events.paginate_events(100, 1)
 
       assert %{data: [%{id: ^id1}, %{id: ^id2}]} =
-               Events.list_events(order_by_fields: [asc: :sequence])
+               Events.paginate_events(100, 1, order_by_fields: [asc: :sequence])
     end
 
     test "filters" do
@@ -40,7 +41,7 @@ defmodule AppRecorder.EventsTest do
         [type: event.type]
       ]
       |> Enum.each(fn filter ->
-        assert %{data: [_event], total: 1} = Events.list_events(filters: filter)
+        assert %{data: [_event], total: 1} = Events.paginate_events(100, 1, filters: filter)
       end)
 
       [
@@ -56,7 +57,7 @@ defmodule AppRecorder.EventsTest do
         [type: "type"]
       ]
       |> Enum.each(fn filter ->
-        assert %{data: [], total: 0} = Events.list_events(filters: filter)
+        assert %{data: [], total: 0} = Events.paginate_events(100, 1, filters: filter)
       end)
     end
   end

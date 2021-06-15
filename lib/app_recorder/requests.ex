@@ -3,30 +3,26 @@ defmodule AppRecorder.Requests do
   The requests context.
   """
 
-  import Ecto.Query, only: [order_by: 2]
-
   alias AppRecorder.Requests.{Request, RequestQueryable}
 
-  @default_order_by [desc: :id]
-  @default_page_number 1
-  @default_page_size 100
-
-  @spec list_requests(keyword) :: %{data: [Request.t()], total: integer}
-  def list_requests(opts \\ []) do
-    page_number = Keyword.get(opts, :page_number, @default_page_number)
-    page_size = Keyword.get(opts, :page_size, @default_page_size)
-    order_by_fields = list_order_by_fields(opts)
-
-    query = request_queryable(opts)
-
+  @spec paginate_requests(pos_integer, pos_integer, keyword) :: %{
+          data: [Request.t()],
+          total: integer
+        }
+  def paginate_requests(page_size, page_number, opts \\ [])
+      when is_integer(page_number) and is_integer(page_size) do
     try do
+      query = opts |> request_queryable()
+
       requests =
         query
-        |> order_by(^order_by_fields)
-        |> RequestQueryable.paginate(page_number, page_size)
+        |> RequestQueryable.paginate(page_size, page_number)
         |> AppRecorder.repo().all()
 
-      %{total: AppRecorder.repo().aggregate(query, :count, :id), data: requests}
+      %{
+        data: requests,
+        total: AppRecorder.repo().aggregate(query, :count, :id)
+      }
     rescue
       Ecto.Query.CastError -> %{total: 0, data: []}
     end
@@ -66,16 +62,10 @@ defmodule AppRecorder.Requests do
 
   defp request_queryable(opts) do
     filters = Keyword.get(opts, :filters, [])
+    order_bys = Keyword.get(opts, :order_by_fields, desc: :id)
 
     RequestQueryable.queryable()
     |> RequestQueryable.filter(filters)
-  end
-
-  defp list_order_by_fields(opts) do
-    Keyword.get(opts, :order_by_fields, [])
-    |> case do
-      [] -> @default_order_by
-      [_ | _] = order_by_fields -> order_by_fields
-    end
+    |> RequestQueryable.order_by(order_bys)
   end
 end
