@@ -5,6 +5,18 @@ defmodule AppRecorder.OutgoingRequests do
   alias AppRecorder.RequestId
   alias AppRecorder.OutgoingRequests.{OutgoingRequest, OutgoingRequestQueryable}
 
+  @doc ~S"""
+  List all outgoing_requests
+  """
+  @spec list_outgoing_requests(keyword) :: [Event.t()]
+  def list_outgoing_requests(opts \\ []) do
+    try do
+      opts |> outgoing_request_queryable() |> AppRecorder.repo().all()
+    rescue
+      Ecto.Query.CastError -> []
+    end
+  end
+
   @spec paginate_outgoing_requests(pos_integer, pos_integer, keyword) :: %{
           data: [OutgoingRequest.t()],
           total: integer,
@@ -14,7 +26,7 @@ defmodule AppRecorder.OutgoingRequests do
   def paginate_outgoing_requests(page_size, page_number, opts \\ [])
       when is_integer(page_number) and is_integer(page_size) do
     try do
-      query = opts |> request_queryable()
+      query = opts |> outgoing_request_queryable()
 
       requests =
         query
@@ -57,14 +69,14 @@ defmodule AppRecorder.OutgoingRequests do
   def get_outgoing_request(id) when is_binary(id) do
     try do
       [filters: [id: id]]
-      |> request_queryable()
+      |> outgoing_request_queryable()
       |> AppRecorder.repo().one()
     rescue
       Ecto.Query.CastError -> nil
     end
   end
 
-  defp request_queryable(opts) do
+  defp outgoing_request_queryable(opts) do
     filters = Keyword.get(opts, :filters, [])
     order_bys = Keyword.get(opts, :order_by_fields, desc: :id)
 
