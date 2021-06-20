@@ -129,10 +129,13 @@ defmodule AppRecorder.Events do
     end)
   end
 
-  @spec get_event(binary) :: Event.t() | nil
-  def get_event(id) when is_binary(id) do
+  @spec get_event(binary, keyword) :: Event.t() | nil
+  def get_event(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    filters = opts |> Keyword.get(:filters, []) |> Keyword.put(:id, id)
+
     try do
-      [filters: [id: id]]
+      opts
+      |> Keyword.put(:filters, filters)
       |> event_queryable()
       |> AppRecorder.repo().one()
     rescue
@@ -140,9 +143,12 @@ defmodule AppRecorder.Events do
     end
   end
 
-  @spec get_event!(binary) :: Event.t()
-  def get_event!(id) when is_binary(id) do
-    [filters: [id: id]]
+  @spec get_event!(binary, keyword) :: Event.t()
+  def get_event!(id, opts \\ []) when is_binary(id) and is_list(opts) do
+    filters = opts |> Keyword.get(:filters, []) |> Keyword.put(:id, id)
+
+    opts
+    |> Keyword.put(:filters, filters)
     |> event_queryable()
     |> AppRecorder.repo().one!()
   end

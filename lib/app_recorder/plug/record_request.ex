@@ -58,10 +58,18 @@ defmodule AppRecorder.Plug.RecordRequest do
          %Plug.Conn{method: "POST", private: %{idempotency_key: idempotency_key}} = conn
        )
        when is_binary(idempotency_key) do
+    filters = [account_id: Map.get(conn.assigns, AppRecorder.owner_id_field(:schema), 0)]
+
+    filters =
+      if(AppRecorder.with_livemode?(),
+        do: filters |> Keyword.put(:livemode, conn.assigns["livemode?"]),
+        else: filters
+      )
+
     conn
     |> Conn.put_private(
       :original_request,
-      AppRecorder.Requests.get_request_by(idempotency_key: idempotency_key)
+      AppRecorder.Requests.get_request_by([idempotency_key: idempotency_key], filters)
     )
     |> Conn.put_private(:replayed_request?, not is_nil(conn.private.original_request))
   end
