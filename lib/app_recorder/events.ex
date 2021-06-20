@@ -147,8 +147,6 @@ defmodule AppRecorder.Events do
     |> AppRecorder.repo().one!()
   end
 
-  defp get_event_by(filters, opts \\ [])
-
   defp get_event_by([idempotency_key: nil], _), do: nil
 
   defp get_event_by([idempotency_key: idempotency_key], opts) do

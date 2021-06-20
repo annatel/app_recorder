@@ -14,22 +14,28 @@ defmodule AppRecorder.Test.Assertions do
       assert_event_recorded()
       assert_event_recorded(%{resource_id: "id")
   """
-  @spec assert_event_recorded(map) :: true
+  @spec assert_event_recorded(map | pos_integer | nil) :: true
   def assert_event_recorded(attrs \\ %{})
 
-  def assert_event_recorded(%{data: data} = attrs) do
-    events = Events.list_events(filter: attrs |> Map.delete(:data) |> Enum.to_list())
+  def assert_event_recorded(%{} = attrs), do: assert_event_recorded(1, attrs)
 
-    assert length(events) != 0, message("event", attrs)
+  def assert_event_recorded(expected_count) when is_integer(expected_count),
+    do: assert_event_recorded(expected_count, %{})
 
-    assert Enum.filter(events, fn event -> subset?(data, event.data) end) != [],
-           message("event", attrs)
+  def assert_event_recorded(expected_count, %{data: data} = attrs)
+      when is_integer(expected_count) do
+    events = Events.list_events(filters: attrs |> Map.delete(:data) |> Enum.to_list())
+
+    count = events |> Enum.filter(fn event -> subset?(data, event.data) end) |> length()
+
+    assert count == expected_count, message("event", attrs, expected_count, count)
   end
 
-  def assert_event_recorded(attrs) do
-    events = Events.list_events(filter: attrs |> Enum.to_list())
+  def assert_event_recorded(expected_count, attrs) when is_integer(expected_count) do
+    events = Events.list_events(filters: attrs |> Enum.to_list())
+    count = length(events)
 
-    assert length(events) != 0, message("event", attrs)
+    assert count == expected_count, message("event", attrs, expected_count, count)
   end
 
   @doc """
@@ -42,22 +48,35 @@ defmodule AppRecorder.Test.Assertions do
       assert_outgoing_request_recorded()
       assert_outgoing_request_recorded(%{destination: "destination")
   """
+
   @spec assert_outgoing_request_recorded(map) :: true
   def assert_outgoing_request_recorded(attrs \\ %{})
 
-  def assert_outgoing_request_recorded(attrs) do
-    outgoing_requests = OutgoingRequests.list_outgoing_requests(filter: attrs |> Enum.to_list())
+  def assert_outgoing_request_recorded(%{} = attrs),
+    do: assert_outgoing_request_recorded(1, attrs)
 
-    assert length(outgoing_requests) != 0, message("outgoing_request", attrs)
+  def assert_outgoing_request_recorded(expected_count) when is_integer(expected_count),
+    do: assert_outgoing_request_recorded(expected_count, %{})
+
+  def assert_outgoing_request_recorded(expected_count, attrs) do
+    outgoing_requests = OutgoingRequests.list_outgoing_requests(filters: attrs |> Enum.to_list())
+
+    count = length(outgoing_requests)
+    assert count == expected_count, message("outgoing_request", attrs, expected_count, count)
   end
 
   defp subset?(a, b) do
     MapSet.subset?(a |> MapSet.new(), b |> MapSet.new())
   end
 
-  defp message(resource_name, %{} = attrs) do
+  defp message(resource_name, %{} = attrs, expected_count, count) do
     if Enum.empty?(attrs),
-      do: "Expected an #{resource_name}, got none",
-      else: "Expected an #{resource_name} with attributes #{inspect(attrs)}, got none"
+      do:
+        "Expected #{expected_count} #{maybe_pluralized_item(resource_name, expected_count)}, got #{count}",
+      else:
+        "Expected #{expected_count} #{maybe_pluralized_item(resource_name, expected_count)} with attributes #{inspect(attrs)}, got #{count}"
   end
+
+  defp maybe_pluralized_item(resource_name, count) when count > 1, do: resource_name <> "s"
+  defp maybe_pluralized_item(resource_name, _), do: resource_name
 end
