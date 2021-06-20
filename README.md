@@ -12,7 +12,7 @@ The package can be installed by adding `app_recorder` to your list of dependenci
 ```elixir
 def deps do
   [
-    {:app_recorder, "~> 0.2.0"}
+    {:app_recorder, "~> 0.3.1"}
   ]
 end
 ```
