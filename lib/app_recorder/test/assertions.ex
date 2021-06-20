@@ -17,14 +17,12 @@ defmodule AppRecorder.Test.Assertions do
   @spec assert_event_recorded(map) :: true
   def assert_event_recorded(attrs \\ %{})
 
-  def assert_event_recorded(%{data: %{} = data} = attrs) do
+  def assert_event_recorded(%{data: data} = attrs) do
     events = Events.list_events(filter: attrs |> Map.delete(:data) |> Enum.to_list())
 
     assert length(events) != 0, message("event", attrs)
 
-    assert Enum.filter(events, fn event ->
-             subset?(data, event.data |> Recase.Enumerable.atomize_keys())
-           end) != [],
+    assert Enum.filter(events, fn event -> subset?(data, event.data) end) != [],
            message("event", attrs)
   end
 
