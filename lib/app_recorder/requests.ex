@@ -47,10 +47,13 @@ defmodule AppRecorder.Requests do
     |> AppRecorder.repo().update!()
   end
 
-  @spec get_request(binary) :: Request.t() | nil
-  def get_request(id) when is_binary(id) do
+  @spec get_request(binary, keyword) :: Request.t() | nil
+  def get_request(id, opts \\ []) when is_binary(id) do
+    filters = opts |> Keyword.get(:filters, []) |> Keyword.put(:id, id)
+
     try do
-      [filters: [id: id]]
+      opts
+      |> Keyword.put(:filters, filters)
       |> request_queryable()
       |> AppRecorder.repo().one()
     rescue
@@ -58,11 +61,18 @@ defmodule AppRecorder.Requests do
     end
   end
 
-  @spec get_request_by(keyword) :: Request.t() | nil
-  def get_request_by(idempotency_key: idempotency_key) do
-    [filters: [idempotency_key: idempotency_key]]
-    |> request_queryable()
-    |> AppRecorder.repo().one()
+  @spec get_request_by(keyword, keyword) :: Request.t() | nil
+  def get_request_by([idempotency_key: idempotency_key], opts \\ []) do
+    filters = opts |> Keyword.get(:filters, []) |> Keyword.put(:idempotency_key, idempotency_key)
+
+    try do
+      opts
+      |> Keyword.put(:filters, filters)
+      |> request_queryable()
+      |> AppRecorder.repo().one()
+    rescue
+      Ecto.Query.CastError -> nil
+    end
   end
 
   defp request_queryable(opts) do
