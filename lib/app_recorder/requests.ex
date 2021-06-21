@@ -5,6 +5,18 @@ defmodule AppRecorder.Requests do
 
   alias AppRecorder.Requests.{Request, RequestQueryable}
 
+  @doc ~S"""
+  List all events
+  """
+  @spec list_requests(keyword) :: [Request.t()]
+  def list_requests(opts \\ []) do
+    try do
+      opts |> request_queryable() |> AppRecorder.repo().all()
+    rescue
+      Ecto.Query.CastError -> []
+    end
+  end
+
   @spec paginate_requests(pos_integer, pos_integer, keyword) :: %{
           data: [Request.t()],
           total: integer,

@@ -196,7 +196,10 @@ defmodule AppRecorder.Plug.RecordRequest do
 
     cond do
       response_content_type && response_content_type =~ "application/json" ->
-        Jason.encode!(conn.resp_body)
+        case Jason.decode(conn.resp_body) do
+          {:ok, decoded} -> decoded
+          {:error, _} -> conn.resp_body
+        end
 
       true ->
         conn.resp_body
