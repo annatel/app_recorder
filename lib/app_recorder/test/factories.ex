@@ -2,6 +2,7 @@ defmodule AppRecorder.Test.Factories do
   @moduledoc false
 
   alias AppRecorder.Events.Event
+  alias AppRecorder.Requests.Request
 
   @spec build(:event, Enum.t()) :: struct
   def build(:event, attrs) do
@@ -22,13 +23,28 @@ defmodule AppRecorder.Test.Factories do
     |> struct!(attrs)
   end
 
-  defp put_owner_id(%Event{} = event) do
+  def build(:request, attrs) do
+    %Request{
+      created_at: utc_now(),
+      id: AppRecorder.RequestId.generate_request_id("req"),
+      idempotency_key: "idempotency_key_#{System.unique_integer()}",
+      request_data: %{key: "value"},
+      response_data: %{key: "value"},
+      source: "source_#{System.unique_integer()}",
+      success: true
+    }
+    |> put_owner_id()
+    |> maybe_put_livemode()
+    |> struct!(attrs)
+  end
+
+  defp put_owner_id(event_or_request) do
     owner_id_value =
       if elem(AppRecorder.owner_id_field(:schema), 1) == :binary_id,
         do: Ecto.UUID.generate(),
         else: System.unique_integer([:positive])
 
-    event |> Map.put(elem(AppRecorder.owner_id_field(:schema), 0), owner_id_value)
+    event_or_request |> Map.put(elem(AppRecorder.owner_id_field(:schema), 0), owner_id_value)
   end
 
   defp maybe_put_sequence(%Event{} = event) do
@@ -40,10 +56,10 @@ defmodule AppRecorder.Test.Factories do
     event |> Map.merge(attrs)
   end
 
-  defp maybe_put_livemode(%Event{} = event) do
+  defp maybe_put_livemode(event_or_request) do
     attrs = if AppRecorder.with_livemode?(), do: %{livemode: false}, else: %{}
 
-    event |> Map.merge(attrs)
+    event_or_request |> Map.merge(attrs)
   end
 
   @spec params_for(struct) :: map
