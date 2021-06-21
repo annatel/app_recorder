@@ -58,13 +58,14 @@ defmodule AppRecorder.Plug.RecordRequest do
          %Plug.Conn{method: "POST", private: %{idempotency_key: idempotency_key}} = conn
        )
        when is_binary(idempotency_key) do
-    filters = [account_id: Map.get(conn.assigns, AppRecorder.owner_id_field(:schema), 0)]
+    owner_id_field = AppRecorder.owner_id_field(:schema) |> elem(0) |> to_string()
+
+    filters = [account_id: Map.fetch!(conn.assigns, owner_id_field)]
 
     filters =
-      if(AppRecorder.with_livemode?(),
-        do: filters |> Keyword.put(:livemode, conn.assigns["livemode?"]),
+      if AppRecorder.with_livemode?(),
+        do: filters |> Keyword.put(:livemode, Map.fetch!(conn.assigns, "livemode?")),
         else: filters
-      )
 
     conn
     |> Conn.put_private(
@@ -108,12 +109,14 @@ defmodule AppRecorder.Plug.RecordRequest do
     |> AppRecorder.Requests.record_request!()
   end
 
-  defp record_response_data!(%Plug.Conn{} = conn, request) do
+  defp record_response_data!(%Plug.Conn{method: method} = conn, request) do
+    body = if method in ["POST", "PUT", "DELETE"], do: response_body(conn), else: nil
+
     request
     |> Requests.update_request!(%{
       success: conn.status in 200..299,
       response_data: %{
-        body: response_body(conn),
+        body: body,
         headers: response_headers(conn),
         status: conn.status
       }
