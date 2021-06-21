@@ -33,7 +33,7 @@ defmodule AppRecorder.MixProject do
       {:myxql, "~> 0.4.0", only: :test},
       {:postgrex, ">= 0.0.0", only: :test},
       {:shortcode, "~> 0.7.0"},
-      {:antl_utils_ecto, "~> 2.2.0"},
+      {:antl_utils_ecto, "~> 2.3.2"},
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.0"},
       {:recase, "~> 0.7"},
