@@ -203,7 +203,7 @@ defmodule AppRecorder.EventsTest do
     end
   end
 
-  describe "get_event/1" do
+  describe "get_event/2" do
     test "when the event exists, returns the event" do
       %{id: id} = insert!(:event)
 
@@ -214,9 +214,43 @@ defmodule AppRecorder.EventsTest do
       assert is_nil(Events.get_event(uuid()))
       assert is_nil(Events.get_event(shortcode_uuid("evt")))
     end
+
+    test "filters" do
+      %{id: event_id} = event = insert!(:event)
+
+      [
+        [idempotency_key: event.idempotency_key],
+        [livemode: event.livemode],
+        [owner_id: event.owner_id],
+        [request_id: event.request_id],
+        [request_idempotency_key: event.request_idempotency_key],
+        [resource_id: event.resource_id],
+        [resource_object: event.resource_object],
+        [sequence: event.sequence],
+        [type: event.type]
+      ]
+      |> Enum.each(fn filter ->
+        assert %{id: ^event_id} = Events.get_event(event_id, filters: filter)
+      end)
+
+      [
+        [idempotency_key: "idempotency_key"],
+        [livemode: !event.livemode],
+        [owner_id: uuid()],
+        [request_id: request_id()],
+        [request_idempotency_key: "request_idempotency_key"],
+        [resource_id: "resource_id"],
+        [resource_object: "resource_object"],
+        [sequence: 0],
+        [type: "type"]
+      ]
+      |> Enum.each(fn filter ->
+        assert is_nil(Events.get_event(event_id, filters: filter))
+      end)
+    end
   end
 
-  describe "get_event!/1" do
+  describe "get_event!/2" do
     test "when the event exists, returns the event" do
       %{id: id} = insert!(:event)
 

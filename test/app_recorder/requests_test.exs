@@ -106,6 +106,35 @@ defmodule AppRecorder.RequestsTest do
       assert %Request{id: ^id} = Requests.get_request_by(idempotency_key: idempotency_key)
     end
 
+    test "filters" do
+      %{id: request_id, idempotency_key: idempotency_key} = request = insert!(:request)
+
+      [
+        [id: request.id],
+        [livemode: request.livemode],
+        [owner_id: request.owner_id],
+        [source: request.source],
+        [success: request.success]
+      ]
+      |> Enum.each(fn filter ->
+        assert %{id: ^request_id} =
+                 Requests.get_request_by([idempotency_key: idempotency_key], filters: filter)
+      end)
+
+      [
+        [id: request_id()],
+        [livemode: !request.livemode],
+        [owner_id: uuid()],
+        [source: "source"],
+        [success: !request.success]
+      ]
+      |> Enum.each(fn filter ->
+        assert is_nil(
+                 Requests.get_request_by([idempotency_key: idempotency_key], filters: filter)
+               )
+      end)
+    end
+
     test "when then request does not exist, returns nil" do
       assert is_nil(Requests.get_request_by(idempotency_key: uuid()))
     end

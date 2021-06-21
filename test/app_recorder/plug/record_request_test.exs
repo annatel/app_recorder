@@ -50,7 +50,7 @@ defmodule AppRecorder.Plug.RecordRequestTest do
                "url" => "http://www.example.com/"
              }
 
-      assert request.response_data == %{"body" => "Welcome", "headers" => %{}, "status" => 200}
+      assert request.response_data == %{"body" => nil, "headers" => %{}, "status" => 200}
     end
   end
 end
