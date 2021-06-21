@@ -109,8 +109,8 @@ defmodule AppRecorder.Plug.RecordRequest do
     |> AppRecorder.Requests.record_request!()
   end
 
-  defp record_response_data!(%Plug.Conn{method: method} = conn, request) do
-    body = if method in ["POST", "PUT", "DELETE"], do: response_body(conn), else: nil
+  defp record_response_data!(%Plug.Conn{} = conn, request) do
+    body = if record_response_body?(conn), do: response_body(conn), else: nil
 
     request
     |> Requests.update_request!(%{
@@ -121,6 +121,10 @@ defmodule AppRecorder.Plug.RecordRequest do
         status: conn.status
       }
     })
+  end
+
+  defp record_response_body?(%Plug.Conn{} = conn) do
+    conn.method in ["POST", "PUT", "DELETE"] or conn.status not in 200..299
   end
 
   defp build_request_attrs(%Plug.Conn{} = conn, nil) do

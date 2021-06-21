@@ -31,7 +31,11 @@ defmodule AppRecorder.Plug.RecordRequestTest do
       send_resp(conn, 200, "{{")
     end
 
-    get "/bad_request" do
+    get "/return_bad_request" do
+      send_resp(conn, 422, "{\"status\": [\"is invalid\"]}")
+    end
+
+    get "/raise_bad_request" do
       raise %Plug.BadRequestError{}
       send_resp(conn, 200, "Welcome")
     end
@@ -73,6 +77,39 @@ defmodule AppRecorder.Plug.RecordRequestTest do
           "body" => nil,
           "headers" => %{},
           "status" => 200
+        }
+      })
+    end
+
+    test "when the server returns a 422, record the body" do
+      owner_id = uuid()
+      livemode = false
+
+      conn(:get, "/return_bad_request", "")
+      |> Plug.Conn.assign(:livemode?, livemode)
+      |> Plug.Conn.assign(:owner_id, owner_id)
+      |> Plug.Conn.put_req_header("content-type", "plain/text")
+      |> Plug.Conn.fetch_query_params()
+      |> PlugWithRecordRequest.call([])
+
+      assert_request_recorded(%{
+        id: Logger.metadata()[:request_id],
+        livemode: livemode,
+        owner_id: owner_id,
+        request_data: %{
+          "body" => nil,
+          "client_ip" => nil,
+          "headers" => %{"content-type" => "plain/text"},
+          "method" => "GET",
+          "path" => "/return_bad_request",
+          "query_params" => %{},
+          "query_string" => "",
+          "url" => "http://www.example.com/return_bad_request"
+        },
+        response_data: %{
+          "body" => "{\"status\": [\"is invalid\"]}",
+          "headers" => %{},
+          "status" => 422
         }
       })
     end
