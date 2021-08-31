@@ -28,7 +28,7 @@ defmodule AppRecorder.Migrations.OutgoingRequests.V1 do
       add(:requested_at, :utc_datetime, null: false)
       add(:response_http_status, :int, null: true)
       add(:response_headers, :map, null: true)
-      add(:response_body, :string, null: true)
+      add(:response_body, :text, null: true)
       add(:responded_at, :utc_datetime, null: true)
       add(:source, :string, null: false)
       add(:success, :boolean, null: true)

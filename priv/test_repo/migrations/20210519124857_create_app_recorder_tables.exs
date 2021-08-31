@@ -6,7 +6,6 @@ defmodule AppRecorder.TestRepo.Migrations.CreateAppRecorderTables do
     AppRecorder.Migrations.Events.V1.up()
     AppRecorder.Migrations.Requests.V1.up()
     AppRecorder.Migrations.OutgoingRequests.V1.up()
-    AppRecorder.Migrations.OutgoingRequests.V2.up()
     Padlock.Mutexes.Migrations.V1.up()
   end
 

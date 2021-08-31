@@ -8,7 +8,7 @@ defmodule AppRecorder do
   end
 
   @doc false
-  @spec primary_key_type :: boolean
+  @spec primary_key_type :: atom
   def primary_key_type() do
     Application.get_env(:app_recorder, :primary_key_type, :id)
   end
@@ -31,6 +31,12 @@ defmodule AppRecorder do
   @spec with_livemode? :: boolean
   def with_livemode?() do
     Application.get_env(:app_recorder, :with_livemode?, true)
+  end
+
+  @doc false
+  @spec with_path? :: boolean
+  def with_path?() do
+    Application.get_env(:app_recorder, :with_path?, false)
   end
 
   @doc false

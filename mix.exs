@@ -2,13 +2,13 @@ defmodule AppRecorder.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/annatel/app_recorder"
-  @version "0.3.8"
+  @version "0.3.9"
 
   def project do
     [
       app: :app_recorder,
-      version: @version,
-      elixir: "~> 1.11",
+      version: version(),
+      elixir: "~> 1.12",
       start_permanent: Mix.env() == :prod,
       deps: deps(),
       description: description(),
@@ -52,6 +52,7 @@ defmodule AppRecorder.MixProject do
 
   defp aliases do
     [
+      "app.version": &display_app_version/1,
       test: ["ecto.setup", "test"],
       "ecto.setup": [
         "ecto.create --quiet -r AppRecorder.TestRepo",
@@ -81,4 +82,7 @@ defmodule AppRecorder.MixProject do
       ]
     ]
   end
+
+  defp version(), do: @version
+  defp display_app_version(_), do: Mix.shell().info(version())
 end

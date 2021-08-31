@@ -13,6 +13,10 @@ defmodule AppRecorder.Events.EventSchema do
         field(:livemode, :boolean)
       end
 
+      if AppRecorder.with_path?() do
+        field(:path, :string)
+      end
+
       if AppRecorder.with_sequence?() do
         field(:sequence, :integer)
       end
@@ -43,6 +47,11 @@ defmodule AppRecorder.Events.EventSchema do
         required_fields =
           if AppRecorder.with_sequence?(),
             do: [:sequence | required_fields],
+            else: required_fields
+
+        required_fields =
+          if AppRecorder.with_path?(),
+            do: [:path | required_fields],
             else: required_fields
 
         changeset

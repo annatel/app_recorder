@@ -31,6 +31,9 @@ defmodule AppRecorder.Migrations.Events.V1 do
       if AppRecorder.with_livemode?(), do: add(:livemode, :boolean, null: false)
 
       add(:origin, :string, null: true)
+
+      if AppRecorder.with_path?(), do: add(:path, :string, null: false)
+
       add(:request_id, :binary, null: true)
       add(:request_idempotency_key, :string, null: true)
       add(:resource_id, :string, null: true)
@@ -52,7 +55,7 @@ defmodule AppRecorder.Migrations.Events.V1 do
 
     if AppRecorder.with_livemode?(), do: create(index(:app_recorder_events, [:livemode]))
     create(index(:app_recorder_events, [:origin]))
-
+    if AppRecorder.with_path?(), do: create(index(:app_recorder_events, [:path]))
     create(index(:app_recorder_events, [:resource_object]))
     create(index(:app_recorder_events, [:resource_id]))
 

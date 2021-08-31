@@ -176,10 +176,12 @@ defmodule AppRecorder.Events do
   def event_queryable(opts) do
     filters = Keyword.get(opts, :filters, [])
     order_bys = Keyword.get(opts, :order_by_fields, default_order_by_fields())
+    search_query = Keyword.get(opts, :search_query)
 
     EventQueryable.queryable()
     |> EventQueryable.filter(filters)
     |> EventQueryable.order_by(order_bys)
+    |> EventQueryable.search(search_query)
   end
 
   defp default_order_by_fields() do
