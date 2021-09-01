@@ -72,10 +72,10 @@ defmodule AppRecorder.EventsTest do
     test "search query" do
       event = insert!(:event)
 
-      assert %{data: [_], total: 1} = Events.paginate_events(100, 1, search_query: event.path)
+      assert %{data: [_], total: 1} = Events.paginate_events(100, 1, search_query: event.ref)
 
       assert %{data: [], total: 0} =
-               Events.paginate_events(100, 1, search_query: event.path <> "wrong value")
+               Events.paginate_events(100, 1, search_query: event.ref <> "wrong value")
     end
   end
 
@@ -99,7 +99,7 @@ defmodule AppRecorder.EventsTest do
       assert event_1.idempotency_key == event_params.idempotency_key
       assert event_1.livemode == event_params.livemode
       assert event_1.owner_id == event_params.owner_id
-      assert event_1.path == event_params.path
+      assert event_1.ref == event_params.ref
       assert event_1.request_id == request_id
       assert event_1.request_idempotency_key == request_idempotency_key
       assert event_1.resource_id == event_params.resource_id

@@ -34,9 +34,9 @@ defmodule AppRecorder do
   end
 
   @doc false
-  @spec with_path? :: boolean
-  def with_path?() do
-    Application.get_env(:app_recorder, :with_path?, false)
+  @spec with_ref? :: boolean
+  def with_ref?() do
+    Application.get_env(:app_recorder, :with_ref?, false)
   end
 
   @doc false

@@ -3,5 +3,5 @@ defmodule AppRecorder.Events.EventQueryable do
 
   use AntlUtilsEcto.Queryable,
     base_schema: AppRecorder.Events.Event,
-    searchable_fields: [:path]
+    searchable_fields: [:ref]
 end

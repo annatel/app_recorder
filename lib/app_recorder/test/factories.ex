@@ -19,7 +19,7 @@ defmodule AppRecorder.Test.Factories do
     }
     |> put_owner_id()
     |> maybe_put_livemode()
-    |> maybe_put_path()
+    |> maybe_put_ref()
     |> maybe_put_sequence()
     |> struct!(attrs)
   end
@@ -48,10 +48,10 @@ defmodule AppRecorder.Test.Factories do
     event_or_request |> Map.put(elem(AppRecorder.owner_id_field(:schema), 0), owner_id_value)
   end
 
-  defp maybe_put_path(%Event{} = event) do
+  defp maybe_put_ref(%Event{} = event) do
     attrs =
-      if AppRecorder.with_path?(),
-        do: %{path: "path_#{System.unique_integer()}"},
+      if AppRecorder.with_ref?(),
+        do: %{ref: "ref_#{System.unique_integer()}"},
         else: %{}
 
     event |> Map.merge(attrs)

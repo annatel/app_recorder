@@ -21,7 +21,7 @@ defmodule AppRecorder.Events.EventTest do
       assert :livemode in changes_keys
       assert :origin in changes_keys
       assert :owner_id in changes_keys
-      assert :path in changes_keys
+      assert :ref in changes_keys
       assert :request_id in changes_keys
       assert :resource_id in changes_keys
       assert :resource_object in changes_keys
@@ -44,7 +44,7 @@ defmodule AppRecorder.Events.EventTest do
       assert get_field(changeset, :livemode) == event_params.livemode
       assert get_field(changeset, :origin) == event_params.origin
       assert get_field(changeset, :owner_id) == event_params.owner_id
-      assert get_field(changeset, :path) == event_params.path
+      assert get_field(changeset, :ref) == event_params.ref
       assert get_field(changeset, :request_id) == event_params.request_id
       assert get_field(changeset, :resource_id) == event_params.resource_id
       assert get_field(changeset, :resource_object) == event_params.resource_object
@@ -61,7 +61,7 @@ defmodule AppRecorder.Events.EventTest do
       assert %{created_at: ["can't be blank"]} = errors_on(changeset)
       assert %{data: ["can't be blank"]} = errors_on(changeset)
       assert %{owner_id: ["can't be blank"]} = errors_on(changeset)
-      assert %{path: ["can't be blank"]} = errors_on(changeset)
+      assert %{ref: ["can't be blank"]} = errors_on(changeset)
       assert %{sequence: ["can't be blank"]} = errors_on(changeset)
       assert %{type: ["can't be blank"]} = errors_on(changeset)
     end

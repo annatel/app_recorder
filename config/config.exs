@@ -24,5 +24,5 @@ if(Mix.env() == :test) do
     owner_id_field: [migration: {:owner_id, :binary_id}, schema: {:owner_id, :binary_id, []}],
     with_livemode?: true,
     with_sequence?: true,
-    with_path?: true
+    with_ref?: true
 end
