@@ -2,7 +2,7 @@ defmodule AppRecorder.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/annatel/app_recorder"
-  @version "0.3.9"
+  @version "0.3.10"
 
   def project do
     [

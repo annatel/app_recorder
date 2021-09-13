@@ -21,7 +21,7 @@ defmodule AppRecorder.Migrations.OutgoingRequests.V1 do
 
       add(:destination, :string, null: false)
       add(:client_error_message, :string, null: true)
-      add(:request_body, :string, null: true)
+      add(:request_body, :text, null: true)
       add(:request_headers, :map, null: true)
       add(:request_method, :string, null: false)
       add(:request_url, :string, null: false)
