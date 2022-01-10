@@ -70,12 +70,15 @@ defmodule AppRecorder.EventsTest do
     end
 
     test "search query" do
-      event = insert!(:event)
+      event = insert!(:event, data: %{hello: "world"})
 
       assert %{data: [_], total: 1} = Events.paginate_events(100, 1, search_query: event.ref)
+      assert %{data: [_], total: 1} = Events.paginate_events(100, 1, search_query: "world")
 
       assert %{data: [], total: 0} =
                Events.paginate_events(100, 1, search_query: event.ref <> "wrong value")
+
+      assert %{data: [], total: 0} = Events.paginate_events(100, 1, search_query: "hello:world")
     end
   end
 

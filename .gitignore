@@ -30,3 +30,6 @@ app_recorder-*.tar
 .tool-versions
 env/*.env
 !env/example.env
+.env
+.env.*
+!.env.example
