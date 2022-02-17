@@ -2,7 +2,7 @@ defmodule AppRecorder.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/annatel/app_recorder"
-  @version "0.3.11"
+  @version "0.3.12"
 
   def project do
     [
@@ -37,7 +37,7 @@ defmodule AppRecorder.MixProject do
       {:jason, "~> 1.2"},
       {:plug_cowboy, "~> 2.0"},
       {:recase, "~> 0.7"},
-      {:padlock, git: "https://github.com/annatel/padlock.git", tag: "0.2.0"}
+      {:padlock, "~> 0.2"}
     ]
   end
 
