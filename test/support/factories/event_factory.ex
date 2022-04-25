@@ -1,5 +1,6 @@
 defmodule AppRecorder.Factory.Event do
   alias AppRecorder.Events.Event
+  alias AppRecorder.Events.RelatedResource
 
   defmacro __using__(_opts) do
     quote do
@@ -10,6 +11,7 @@ defmodule AppRecorder.Factory.Event do
           data: %{key: "value"},
           idempotency_key: "idempotency_key_#{System.unique_integer()}",
           origin: "origin_#{System.unique_integer()}",
+          related_resources: [build(:event_related_resource)],
           request_id: request_id("req"),
           request_idempotency_key: "request_idempotency_key_#{System.unique_integer()}",
           resource_id: "resource_id_#{System.unique_integer()}",
@@ -22,6 +24,15 @@ defmodule AppRecorder.Factory.Event do
         |> maybe_put_livemode()
         |> maybe_put_ref()
         |> maybe_put_sequence()
+        |> struct!(attrs)
+      end
+
+      def build(:event_related_resource, attrs) do
+        %RelatedResource{
+          resource_id: "resource_id_#{System.unique_integer()}",
+          resource_object: "resource_object_#{System.unique_integer()}"
+        }
+        |> maybe_put_livemode()
         |> struct!(attrs)
       end
 
@@ -56,6 +67,12 @@ defmodule AppRecorder.Factory.Event do
         attrs = if AppRecorder.with_livemode?(), do: %{livemode: false}, else: %{}
 
         event |> Map.merge(attrs)
+      end
+
+      defp maybe_put_livemode(%RelatedResource{} = related_resource) do
+        attrs = if AppRecorder.with_livemode?(), do: %{livemode: false}, else: %{}
+
+        related_resource |> Map.merge(attrs)
       end
     end
   end
