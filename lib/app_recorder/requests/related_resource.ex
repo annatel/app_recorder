@@ -1,5 +1,5 @@
 defmodule AppRecorder.Requests.RelatedResource do
-  use AppRecorder.Events.RelatedResourceSchema
+  use AppRecorder.Requests.RelatedResourceSchema
 
   import Ecto.Changeset, only: [cast: 3, unique_constraint: 3, validate_required: 2]
 

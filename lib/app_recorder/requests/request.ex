@@ -26,7 +26,7 @@ defmodule AppRecorder.Requests.Request do
 
     field(:created_at, :utc_datetime)
     field(:idempotency_key, :string)
-    has_many(:related_resources, RelatedResource)
+    has_many(:related_resources, RelatedResource, preload_order: [asc: :id])
     field(:request_data, :map, default: %{})
     field(:response_data, :map, default: %{})
     field(:source, :string)

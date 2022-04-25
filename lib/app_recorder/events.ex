@@ -175,11 +175,16 @@ defmodule AppRecorder.Events do
   @spec event_queryable(keyword) :: Ecto.Queryable.t()
   def event_queryable(opts) do
     filters = Keyword.get(opts, :filters, [])
+
+    includes =
+      Keyword.get(opts, :includes, []) |> Enum.concat([:related_resources]) |> Enum.uniq()
+
     order_bys = Keyword.get(opts, :order_by_fields, default_order_by_fields())
     search_query = Keyword.get(opts, :search_query)
 
     EventQueryable.queryable()
     |> EventQueryable.filter(filters)
+    |> EventQueryable.include(includes)
     |> EventQueryable.order_by(order_bys)
     |> EventQueryable.search(search_query)
   end

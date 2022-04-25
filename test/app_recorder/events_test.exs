@@ -85,6 +85,18 @@ defmodule AppRecorder.EventsTest do
 
       assert %{data: [], total: 0} = Events.paginate_events(100, 1, search_query: "hello:world")
     end
+
+    test "includes" do
+      %{related_resources: [%{id: id_1}, %{id: id_2}]} =
+        insert!(:event,
+          related_resources: [build(:event_related_resource), build(:event_related_resource)]
+        )
+
+      %{data: [event], total: 1} = Events.paginate_events(100, 1)
+      assert Ecto.assoc_loaded?(event.related_resources)
+
+      assert [%{id: ^id_1}, %{id: ^id_2}] = event.related_resources
+    end
   end
 
   describe "record_event!/3" do

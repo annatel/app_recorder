@@ -89,10 +89,15 @@ defmodule AppRecorder.Requests do
 
   defp request_queryable(opts) do
     filters = Keyword.get(opts, :filters, [])
+
+    includes =
+      Keyword.get(opts, :includes, []) |> Enum.concat([:related_resources]) |> Enum.uniq()
+
     order_bys = Keyword.get(opts, :order_by_fields, desc: :id)
 
     RequestQueryable.queryable()
     |> RequestQueryable.filter(filters)
+    |> RequestQueryable.include(includes)
     |> RequestQueryable.order_by(order_bys)
   end
 end

@@ -58,6 +58,18 @@ defmodule AppRecorder.RequestsTest do
         assert %{data: [], total: 0} = Requests.paginate_requests(100, 1, filters: filter)
       end)
     end
+
+    test "includes" do
+      %{related_resources: [%{id: id_1}, %{id: id_2}]} =
+        insert!(:request,
+          related_resources: [build(:request_related_resource), build(:request_related_resource)]
+        )
+
+      %{data: [request], total: 1} = Requests.paginate_requests(100, 1)
+      assert Ecto.assoc_loaded?(request.related_resources)
+
+      assert [%{id: ^id_1}, %{id: ^id_2}] = request.related_resources
+    end
   end
 
   describe "record_request!/3" do

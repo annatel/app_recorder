@@ -34,7 +34,7 @@ defmodule AppRecorder.Events.Event do
     field(:data, :map, default: %{})
     field(:idempotency_key, :string)
     field(:origin, :string)
-    has_many(:related_resources, RelatedResource)
+    has_many(:related_resources, RelatedResource, preload_order: [asc: :id])
     field(:request_id, RequestId, prefix: "req")
     field(:request_idempotency_key, :string)
     field(:resource_id, :string)
