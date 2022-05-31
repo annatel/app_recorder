@@ -31,21 +31,30 @@ defmodule AppRecorder.Migrations.Events.V2 do
     create(index(:app_recorder_event_related_resources, [:resource_id]))
     create(index(:app_recorder_event_related_resources, [:resource_object]))
 
-    if AppRecorder.with_livemode?(),
-      do: create(index(:app_recorder_event_related_resources, [:livemode]))
+    if AppRecorder.with_livemode?() do
+      create(index(:app_recorder_event_related_resources, [:livemode]))
 
-    create(
-      unique_index(
-        :app_recorder_event_related_resources,
-        [
-          :event_id,
-          :resource_id,
-          :resource_object,
-          :livemode
-        ],
-        name: :arerr_event_id_rid_robject_livemode
+      create(
+        unique_index(
+          :app_recorder_event_related_resources,
+          [
+            :event_id,
+            :resource_id,
+            :resource_object,
+            :livemode
+          ],
+          name: :arerr_event_id_rid_robject_livemode
+        )
       )
-    )
+    else
+      create(
+        unique_index(
+          :app_recorder_event_related_resources,
+          [:event_id, :resource_id, :resource_object],
+          name: :arerr_event_id_rid_robject
+        )
+      )
+    end
   end
 
   defp drop_event_related_resources_table do
