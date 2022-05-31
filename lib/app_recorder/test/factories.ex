@@ -1,16 +1,17 @@
 defmodule AppRecorder.Test.Factories do
   @moduledoc false
 
-  alias AppRecorder.Events.Event
-  alias AppRecorder.Requests.Request
+  alias AppRecorder.Events
+  alias AppRecorder.Requests
 
   @spec build(:event, Enum.t()) :: struct
   def build(:event, attrs) do
-    %Event{
+    %Events.Event{
       api_version: "api_version",
       created_at: utc_now(),
       data: %{key: "value"},
       idempotency_key: "idempotency_key_#{System.unique_integer()}",
+      related_resources: [build(:event_related_resource)],
       request_id: AppRecorder.RequestId.generate_request_id("req"),
       request_idempotency_key: "request_idempotency_key_#{System.unique_integer()}",
       resource_id: "resource_id_#{System.unique_integer()}",
@@ -24,8 +25,18 @@ defmodule AppRecorder.Test.Factories do
     |> struct!(attrs)
   end
 
+  @spec build(:event_related_resource, Enum.t()) :: struct
+  def build(:event_related_resource, attrs) do
+    %Events.RelatedResource{
+      resource_id: "resource_id_#{System.unique_integer()}",
+      resource_object: "resource_object_#{System.unique_integer()}"
+    }
+    |> maybe_put_livemode()
+    |> struct!(attrs)
+  end
+
   def build(:request, attrs) do
-    %Request{
+    %Requests.Request{
       created_at: utc_now(),
       id: AppRecorder.RequestId.generate_request_id("req"),
       idempotency_key: "idempotency_key_#{System.unique_integer()}",
@@ -39,6 +50,16 @@ defmodule AppRecorder.Test.Factories do
     |> struct!(attrs)
   end
 
+  @spec build(:request_related_resource, Enum.t()) :: struct
+  def build(:request_related_resource, attrs) do
+    %Requests.RelatedResource{
+      resource_id: "resource_id_#{System.unique_integer()}",
+      resource_object: "resource_object_#{System.unique_integer()}"
+    }
+    |> maybe_put_livemode()
+    |> struct!(attrs)
+  end
+
   defp put_owner_id(event_or_request) do
     owner_id_value =
       if elem(AppRecorder.owner_id_field(:migration), 1) == :binary_id,
@@ -48,7 +69,7 @@ defmodule AppRecorder.Test.Factories do
     event_or_request |> Map.put(elem(AppRecorder.owner_id_field(:schema), 0), owner_id_value)
   end
 
-  defp maybe_put_ref(%Event{} = event) do
+  defp maybe_put_ref(%Events.Event{} = event) do
     attrs =
       if AppRecorder.with_ref?(),
         do: %{ref: "ref_#{System.unique_integer()}"},
@@ -57,7 +78,7 @@ defmodule AppRecorder.Test.Factories do
     event |> Map.merge(attrs)
   end
 
-  defp maybe_put_sequence(%Event{} = event) do
+  defp maybe_put_sequence(%Events.Event{} = event) do
     attrs =
       if AppRecorder.with_sequence?(),
         do: %{sequence: AppRecorder.Sequences.next_value!(:events)},

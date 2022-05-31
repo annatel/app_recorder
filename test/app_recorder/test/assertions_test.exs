@@ -40,6 +40,13 @@ defmodule AppRecorder.Test.AssertionsTest do
       assert_event_recorded(%{resource_id: resource_id})
     end
 
+    test "when the event is found according to related_resource" do
+      %{related_resources: [%{resource_id: related_resource_id}]} = insert!(:event)
+      insert!(:event)
+
+      assert_event_recorded(%{related_resource_id: related_resource_id})
+    end
+
     test "when the event is not found" do
       message =
         %ExUnit.AssertionError{

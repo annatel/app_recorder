@@ -12,7 +12,7 @@ The package can be installed by adding `app_recorder` to your list of dependenci
 ```elixir
 def deps do
   [
-    {:app_recorder, "~> 0.3"}
+    {:app_recorder, "~> 0.4"}
   ]
 end
 ```
@@ -28,17 +28,21 @@ defmodule AppRecorder.TestRepo.Migrations.CreateAppRecorderTables do
 
     Padlock.Mutexes.Migrations.V1.up()
     AppRecorder.Migrations.Events.V1.up()
-    
+    AppRecorder.Migrations.Events.V2.up()
+
     AppRecorder.Migrations.Requests.V1.up()
+    AppRecorder.Migrations.Requests.V2.up()
   end
 
   def down do
     AppRecorder.Migrations.V1.down()
-    
+
     Padlock.Mutexes.Migrations.V1.down()
     AppRecorder.Migrations.Events.V1.down()
+    AppRecorder.Migrations.Events.V2.down()
 
     AppRecorder.Migrations.Requests.V1.down()
+    AppRecorder.Migrations.Requests.V2.down()
   end
 end
 

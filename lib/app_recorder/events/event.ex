@@ -1,8 +1,10 @@
 defmodule AppRecorder.Events.Event do
   use AppRecorder.Events.EventSchema
 
-  import Ecto.Changeset, only: [cast: 3, unique_constraint: 2, validate_required: 2]
+  import Ecto.Changeset,
+    only: [cast: 3, cast_assoc: 3, get_field: 2, unique_constraint: 2, validate_required: 2]
 
+  alias AppRecorder.Events.RelatedResource
   alias AppRecorder.Extensions.Ecto.Types.RequestId
 
   @type t :: %__MODULE__{
@@ -13,6 +15,7 @@ defmodule AppRecorder.Events.Event do
           inserted_at: DateTime.t(),
           object: binary,
           origin: binary | nil,
+          related_resources: [RelatedResource.t()],
           request_id: binary | nil,
           request_idempotency_key: binary | nil,
           resource_id: binary | nil,
@@ -31,6 +34,7 @@ defmodule AppRecorder.Events.Event do
     field(:data, :map, default: %{})
     field(:idempotency_key, :string)
     field(:origin, :string)
+    has_many(:related_resources, RelatedResource, preload_order: [asc: :id])
     field(:request_id, RequestId, prefix: "req")
     field(:request_idempotency_key, :string)
     field(:resource_id, :string)
@@ -61,5 +65,18 @@ defmodule AppRecorder.Events.Event do
     |> validate_required([:created_at, :data, :type])
     |> unique_constraint([:idempotency_key, :source])
     |> validate_configurable_fields(attrs)
+    |> cast_assoc_related_resources()
+  end
+
+  defp cast_assoc_related_resources(%Ecto.Changeset{} = changeset) do
+    parent_attrs = %{
+      livemode: get_field(changeset, :livemode)
+    }
+
+    changeset
+    |> cast_assoc(:related_resources,
+      required: false,
+      with: {RelatedResource, :changeset, [parent_attrs]}
+    )
   end
 end

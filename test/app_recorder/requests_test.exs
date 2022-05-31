@@ -27,13 +27,16 @@ defmodule AppRecorder.RequestsTest do
     end
 
     test "filters" do
-      request = insert!(:request)
+      %{related_resources: [related_resource]} = request = insert!(:request)
 
       [
         [id: request.id],
         [idempotency_key: request.idempotency_key],
         [livemode: request.livemode],
         [owner_id: request.owner_id],
+        [related_resource_id: related_resource.resource_id],
+        [related_resource_id: [related_resource.resource_id]],
+        [related_resource_object: related_resource.resource_object],
         [source: request.source],
         [success: request.success]
       ]
@@ -46,6 +49,8 @@ defmodule AppRecorder.RequestsTest do
         [idempotency_key: "idempotency_key"],
         [livemode: !request.livemode],
         [owner_id: uuid()],
+        [related_resource_id: "related_resource_id"],
+        [related_resource_object: "related_resource_object"],
         [source: "source"],
         [success: !request.success]
       ]
@@ -53,12 +58,26 @@ defmodule AppRecorder.RequestsTest do
         assert %{data: [], total: 0} = Requests.paginate_requests(100, 1, filters: filter)
       end)
     end
+
+    test "includes" do
+      %{related_resources: [%{id: id_1}, %{id: id_2}]} =
+        insert!(:request,
+          related_resources: [build(:request_related_resource), build(:request_related_resource)]
+        )
+
+      %{data: [request], total: 1} = Requests.paginate_requests(100, 1)
+      assert Ecto.assoc_loaded?(request.related_resources)
+
+      assert [%{id: ^id_1}, %{id: ^id_2}] = request.related_resources
+    end
   end
 
   describe "record_request!/3" do
     test "when data is valid, creates an request" do
       request_id = request_id("req")
-      request_params = params_for(:request, id: request_id)
+
+      %{related_resources: [related_resource_params]} =
+        request_params = params_for(:request, id: request_id)
 
       request = Requests.record_request!(request_params)
       assert %Request{} = request
@@ -66,11 +85,32 @@ defmodule AppRecorder.RequestsTest do
       assert_in_delta DateTime.to_unix(request.created_at), DateTime.to_unix(utc_now()), 5
       assert request.idempotency_key == request_params.idempotency_key
       assert request.livemode == request_params.livemode
+      assert request.owner_id == request_params.owner_id
+      assert [related_resource] = request.related_resources
+      assert related_resource.resource_id == related_resource_params.resource_id
+      assert related_resource.resource_object == related_resource_params.resource_object
       assert request.request_data == request_params.request_data
       assert request.response_data == request_params.request_data
-      assert request.owner_id == request_params.owner_id
       assert request.source == request_params.source
       assert request.success == request_params.success
+    end
+
+    test "id, livemode, request_data and owner_id are required" do
+      assert_raise Ecto.InvalidChangesetError, ~r/id: \[{\"can't be blank\"/, fn ->
+        Requests.record_request!(%{})
+      end
+
+      assert_raise Ecto.InvalidChangesetError, ~r/request_data: \[{\"can't be blank\"/, fn ->
+        Requests.record_request!(%{request_data: nil, response_data: nil})
+      end
+
+      assert_raise Ecto.InvalidChangesetError, ~r/livemode: \[{\"can't be blank\"/, fn ->
+        Requests.record_request!(%{})
+      end
+
+      assert_raise Ecto.InvalidChangesetError, ~r/owner_id: \[{\"can't be blank\"/, fn ->
+        Requests.record_request!(%{})
+      end
     end
 
     test "when data is invalid, raises an Ecto.InvalidChangesetError" do

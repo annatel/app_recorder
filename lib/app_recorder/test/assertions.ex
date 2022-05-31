@@ -23,6 +23,7 @@ defmodule AppRecorder.Test.Assertions do
   def assert_event_recorded(expected_count) when is_integer(expected_count),
     do: assert_event_recorded(expected_count, %{})
 
+  @spec assert_event_recorded(integer, map) :: true
   def assert_event_recorded(expected_count, %{data: data} = attrs)
       when is_integer(expected_count) do
     events = Events.list_events(filters: attrs |> Map.delete(:data) |> Enum.to_list())

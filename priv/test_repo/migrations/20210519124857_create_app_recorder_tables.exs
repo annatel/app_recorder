@@ -4,7 +4,9 @@ defmodule AppRecorder.TestRepo.Migrations.CreateAppRecorderTables do
   def up do
     AppRecorder.Migrations.V1.up()
     AppRecorder.Migrations.Events.V1.up()
+    AppRecorder.Migrations.Events.V2.up()
     AppRecorder.Migrations.Requests.V1.up()
+    AppRecorder.Migrations.Requests.V2.up()
     AppRecorder.Migrations.OutgoingRequests.V1.up()
     Padlock.Mutexes.Migrations.V1.up()
   end
@@ -12,7 +14,9 @@ defmodule AppRecorder.TestRepo.Migrations.CreateAppRecorderTables do
   def down do
     AppRecorder.Migrations.V1.down()
     AppRecorder.Migrations.Events.V1.down()
+    AppRecorder.Migrations.Events.V2.down()
     AppRecorder.Migrations.Requests.V1.down()
+    AppRecorder.Migrations.Requests.V2.down()
     AppRecorder.Migrations.OutgoingRequests.V1.down()
     Padlock.Mutexes.Migrations.V1.down()
   end

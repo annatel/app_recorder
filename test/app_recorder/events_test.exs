@@ -34,13 +34,16 @@ defmodule AppRecorder.EventsTest do
     end
 
     test "filters" do
-      event = insert!(:event)
+      %{related_resources: [related_resource]} = event = insert!(:event)
 
       [
         [id: event.id],
         [idempotency_key: event.idempotency_key],
         [livemode: event.livemode],
         [owner_id: event.owner_id],
+        [related_resource_id: related_resource.resource_id],
+        [related_resource_id: [related_resource.resource_id]],
+        [related_resource_object: related_resource.resource_object],
         [request_id: event.request_id],
         [request_idempotency_key: event.request_idempotency_key],
         [resource_id: event.resource_id],
@@ -57,6 +60,8 @@ defmodule AppRecorder.EventsTest do
         [idempotency_key: "idempotency_key"],
         [livemode: !event.livemode],
         [owner_id: uuid()],
+        [related_resource_id: "related_resource_id"],
+        [related_resource_object: "related_resource_object"],
         [request_id: request_id()],
         [request_idempotency_key: "request_idempotency_key"],
         [resource_id: "resource_id"],
@@ -80,6 +85,18 @@ defmodule AppRecorder.EventsTest do
 
       assert %{data: [], total: 0} = Events.paginate_events(100, 1, search_query: "hello:world")
     end
+
+    test "includes" do
+      %{related_resources: [%{id: id_1}, %{id: id_2}]} =
+        insert!(:event,
+          related_resources: [build(:event_related_resource), build(:event_related_resource)]
+        )
+
+      %{data: [event], total: 1} = Events.paginate_events(100, 1)
+      assert Ecto.assoc_loaded?(event.related_resources)
+
+      assert [%{id: ^id_1}, %{id: ^id_2}] = event.related_resources
+    end
   end
 
   describe "record_event!/3" do
@@ -89,7 +106,13 @@ defmodule AppRecorder.EventsTest do
       Logger.metadata(request_id: request_id)
       Logger.metadata(request_idempotency_key: request_idempotency_key)
 
-      event_params = params_for(:event, request_id: nil)
+      %{related_resources: [related_resource_params]} =
+        event_params =
+        params_for(:event,
+          created_at: utc_now() |> add(3600, :second),
+          request_id: nil,
+          sequence: 12345
+        )
 
       event_1 = Events.record_event!(event_params)
       event_2 = Events.record_event!(params_for(:event))
@@ -101,15 +124,45 @@ defmodule AppRecorder.EventsTest do
       assert event_1.data == event_1.data
       assert event_1.idempotency_key == event_params.idempotency_key
       assert event_1.livemode == event_params.livemode
+      assert event_1.origin == event_params.origin
       assert event_1.owner_id == event_params.owner_id
       assert event_1.ref == event_params.ref
+      assert [related_resource] = event_1.related_resources
+      assert related_resource.resource_id == related_resource_params.resource_id
+      assert related_resource.resource_object == related_resource_params.resource_object
+      assert related_resource.livemode == event_params.livemode
       assert event_1.request_id == request_id
       assert event_1.request_idempotency_key == request_idempotency_key
       assert event_1.resource_id == event_params.resource_id
       assert event_1.resource_object == event_params.resource_object
+      refute event_1.sequence == event_params.sequence
+      assert event_1.source == event_params.source
+      assert event_1.source_event_id == event_params.source_event_id
       assert event_1.type == event_params.type
 
       assert event_2.sequence > event_1.sequence
+    end
+
+    test "data, livemode, owner_id, ref and type are required" do
+      assert_raise Ecto.InvalidChangesetError, ~r/data: \[{\"can't be blank\"/, fn ->
+        Events.record_event!(%{data: nil})
+      end
+
+      assert_raise Ecto.InvalidChangesetError, ~r/livemode: \[{\"can't be blank\"/, fn ->
+        Events.record_event!(%{})
+      end
+
+      assert_raise Ecto.InvalidChangesetError, ~r/owner_id: \[{\"can't be blank\"/, fn ->
+        Events.record_event!(%{})
+      end
+
+      assert_raise Ecto.InvalidChangesetError, ~r/ref: \[{\"can't be blank\"/, fn ->
+        Events.record_event!(%{})
+      end
+
+      assert_raise Ecto.InvalidChangesetError, ~r/type: \[{\"can't be blank\"/, fn ->
+        Events.record_event!(%{})
+      end
     end
 
     test "when an event already exists with the idempotency_key from the same source, no matter the other params, do not create a new event and returns already recorded event" do
