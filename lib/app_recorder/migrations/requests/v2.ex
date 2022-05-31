@@ -40,21 +40,30 @@ defmodule AppRecorder.Migrations.Requests.V2 do
     create(index(:app_recorder_request_related_resources, [:resource_id]))
     create(index(:app_recorder_request_related_resources, [:resource_object]))
 
-    if AppRecorder.with_livemode?(),
-      do: create(index(:app_recorder_request_related_resources, [:livemode]))
+    if AppRecorder.with_livemode?() do
+      create(index(:app_recorder_request_related_resources, [:livemode]))
 
-    create(
-      unique_index(
-        :app_recorder_request_related_resources,
-        [
-          :request_id,
-          :resource_id,
-          :resource_object,
-          :livemode
-        ],
-        name: :arrrr_reqid_rid_robject_livemode
+      create(
+        unique_index(
+          :app_recorder_request_related_resources,
+          [
+            :request_id,
+            :resource_id,
+            :resource_object,
+            :livemode
+          ],
+          name: :arrrr_reqid_rid_robject_livemode
+        )
       )
-    )
+    else
+      create(
+        unique_index(
+          :app_recorder_request_related_resources,
+          [:request_id, :resource_id, :resource_object],
+          name: :arrrr_reqid_rid_robject
+        )
+      )
+    end
   end
 
   defp drop_request_related_resources_table do
