@@ -21,6 +21,7 @@ defmodule AppRecorder.Events.EventQueryable do
 
     queryable
     |> where([event], event.id in subquery(event_ids_query))
+    |> AntlUtilsEcto.Query.or_where(:resource_id, value)
   end
 
   defp filter_by_field(queryable, {:related_resource_object, value}) do
@@ -31,5 +32,6 @@ defmodule AppRecorder.Events.EventQueryable do
 
     queryable
     |> where([event], event.id in subquery(event_ids_query))
+    |> AntlUtilsEcto.Query.or_where(:resource_object, value)
   end
 end

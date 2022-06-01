@@ -74,6 +74,19 @@ defmodule AppRecorder.EventsTest do
       end)
     end
 
+    test "related_resource_id and related_resource_object filter also according to resource_id and resource_object" do
+      event = insert!(:event, related_resources: [])
+
+      [
+        [related_resource_id: event.resource_id],
+        [related_resource_id: [event.resource_id]],
+        [related_resource_object: event.resource_object]
+      ]
+      |> Enum.each(fn filter ->
+        assert %{data: [_event], total: 1} = Events.paginate_events(100, 1, filters: filter)
+      end)
+    end
+
     test "search query" do
       event = insert!(:event, data: %{hello: "world"})
 
