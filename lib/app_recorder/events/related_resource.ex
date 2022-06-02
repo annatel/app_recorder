@@ -1,7 +1,7 @@
 defmodule AppRecorder.Events.RelatedResource do
   use AppRecorder.Events.RelatedResourceSchema
 
-  import Ecto.Changeset, only: [cast: 3, unique_constraint: 3, validate_required: 2]
+  import Ecto.Changeset, only: [cast: 3, validate_required: 2]
 
   @type t :: %__MODULE__{
           resource_id: binary | nil,
@@ -25,9 +25,6 @@ defmodule AppRecorder.Events.RelatedResource do
     related_resource
     |> cast(attrs, [:resource_id, :resource_object])
     |> validate_required([:resource_id, :resource_object])
-    |> unique_constraint([:event_id, :resource_id, :resource_object, :livemode],
-      name: :arerr_event_id_rid_robject_livemode
-    )
     |> cast_and_validate_configurable_fields(attrs, parent_attrs)
   end
 end

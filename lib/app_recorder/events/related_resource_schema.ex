@@ -25,9 +25,19 @@ defmodule AppRecorder.Events.RelatedResourceSchema do
              attrs,
              parent_attrs
            ) do
-        if AppRecorder.with_livemode?(),
-          do: changeset |> Ecto.Changeset.put_change(:livemode, Map.get(parent_attrs, :livemode)),
-          else: changeset
+        if AppRecorder.with_livemode?() do
+          changeset
+          |> Ecto.Changeset.put_change(:livemode, Map.get(parent_attrs, :livemode))
+          |> Ecto.Changeset.unique_constraint(
+            [:event_id, :resource_id, :resource_object, :livemode],
+            name: :arerr_event_id_rid_robject_livemode
+          )
+        else
+          changeset
+          |> Ecto.Changeset.unique_constraint([:event_id, :resource_id, :resource_object],
+            name: :arerr_event_id_rid_robject
+          )
+        end
       end
     end
   end

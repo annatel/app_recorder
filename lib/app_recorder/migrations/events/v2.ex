@@ -28,6 +28,7 @@ defmodule AppRecorder.Migrations.Events.V2 do
     end
 
     create(index(:app_recorder_event_related_resources, [:event_id]))
+    create(index(:app_recorder_event_related_resources, [:event_id, :id]))
     create(index(:app_recorder_event_related_resources, [:resource_id]))
     create(index(:app_recorder_event_related_resources, [:resource_object]))
 

@@ -6,6 +6,7 @@ defmodule AppRecorder.Events do
   alias Ecto.Multi
 
   alias AppRecorder.Events.{Event, EventQueryable}
+  alias AppRecorder.Events.{RelatedResource, RelatedResourceQueryable}
 
   @doc ~S"""
   List all events
@@ -14,6 +15,16 @@ defmodule AppRecorder.Events do
   def list_events(opts \\ []) do
     try do
       opts |> event_queryable() |> AppRecorder.repo().all()
+    rescue
+      Ecto.Query.CastError -> []
+    end
+  end
+
+  @doc false
+  @spec list_related_resources(keyword) :: [RelatedResource.t()]
+  def list_related_resources(opts \\ []) do
+    try do
+      opts |> related_resources_queryable() |> AppRecorder.repo().all()
     rescue
       Ecto.Query.CastError -> []
     end
@@ -187,6 +198,15 @@ defmodule AppRecorder.Events do
     |> EventQueryable.include(includes)
     |> EventQueryable.order_by(order_bys)
     |> EventQueryable.search(search_query)
+  end
+
+  defp related_resources_queryable(opts) do
+    fields = Keyword.get(opts, :fields, [])
+    filters = Keyword.get(opts, :filters, [])
+
+    RelatedResourceQueryable.queryable()
+    |> RelatedResourceQueryable.filter(filters)
+    |> RelatedResourceQueryable.select_fields(fields)
   end
 
   defp default_order_by_fields() do
