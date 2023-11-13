@@ -69,14 +69,12 @@ defmodule AppRecorder.Events.Event do
   end
 
   defp cast_assoc_related_resources(%Ecto.Changeset{} = changeset) do
-    parent_attrs = %{
-      livemode: get_field(changeset, :livemode)
-    }
-
     changeset
     |> cast_assoc(:related_resources,
       required: false,
-      with: {RelatedResource, :changeset, [parent_attrs]}
+      with: fn cset, attrs ->
+        RelatedResource.changeset(cset, attrs, %{livemode: get_field(changeset, :livemode)})
+      end
     )
   end
 end

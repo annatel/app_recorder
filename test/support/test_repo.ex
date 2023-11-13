@@ -1,5 +1,5 @@
 defmodule AppRecorder.TestRepo do
-  @test_repo_adapter Application.get_env(:app_recorder, :test_repo_adapter, "myxql")
+  @test_repo_adapter Application.compile_env(:app_recorder, :test_repo_adapter, "myxql")
 
   @test_repo_adapter_options %{
     "myxql" => Ecto.Adapters.MyXQL,

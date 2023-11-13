@@ -2,7 +2,7 @@ defmodule AppRecorder.MixProject do
   use Mix.Project
 
   @source_url "https://github.com/annatel/app_recorder"
-  @version "0.4.3"
+  @version "0.4.4"
 
   def project do
     [
@@ -29,8 +29,8 @@ defmodule AppRecorder.MixProject do
   defp deps do
     [
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false},
-      {:ecto_sql, "~> 3.6"},
-      {:myxql, "~> 0.4.0", only: :test},
+      {:ecto_sql, "~> 3.10"},
+      {:myxql, "~> 0.4", only: :test},
       {:postgrex, ">= 0.0.0", only: :test},
       {:shortcode, "~> 0.7.0"},
       {:antl_utils_ecto, "~> 2.4"},

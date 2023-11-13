@@ -1,7 +1,7 @@
 import Config
 
 if(Mix.env() == :test) do
-  config :logger, level: System.get_env("EX_LOG_LEVEL", "warn") |> String.to_atom()
+  config :logger, level: System.get_env("EX_LOG_LEVEL", "warning") |> String.to_atom()
 
   config :app_recorder, ecto_repos: [AppRecorder.TestRepo]
 

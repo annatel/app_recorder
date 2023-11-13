@@ -84,7 +84,7 @@ defmodule AppRecorder.Test.AssertionsTest do
       })
     end
 
-    test "when data is specified but not match" do
+    test "when data is specified but value does not match" do
       %{data: %{key: "value"}} = insert!(:event)
 
       message =
@@ -96,6 +96,22 @@ defmodule AppRecorder.Test.AssertionsTest do
 
       assert_raise ExUnit.AssertionError, message, fn ->
         assert_event_recorded(%{data: %{"key" => "wrong_value"}})
+      end
+    end
+
+    test "when data is specified but key does not match" do
+      %{data: %{key: "value"}} = insert!(:event)
+      insert!(:event)
+
+      message =
+        %ExUnit.AssertionError{
+          message:
+          "Expected 1 event with attributes %{data: %{\"key\" => \"value\", \"wrong_key\" => \"whatever\"}}, got 0"
+        }
+        |> ExUnit.AssertionError.message()
+
+      assert_raise ExUnit.AssertionError, message, fn ->
+        assert_event_recorded(%{data: %{"key" => "value", "wrong_key" => "whatever"}})
       end
     end
 
