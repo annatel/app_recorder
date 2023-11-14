@@ -15,7 +15,10 @@ defmodule AppRecorder.Migrations.Events.V2 do
     create table(:app_recorder_event_related_resources) do
       add(
         :event_id,
-        references(:app_recorder_events, on_delete: :nothing, type: AppRecorder.primary_key_type()),
+        references(:app_recorder_events,
+          on_delete: :nothing,
+          type: AppRecorder.primary_key_type()
+        ),
         null: false
       )
 

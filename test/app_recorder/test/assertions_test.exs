@@ -106,7 +106,7 @@ defmodule AppRecorder.Test.AssertionsTest do
       message =
         %ExUnit.AssertionError{
           message:
-          "Expected 1 event with attributes %{data: %{\"key\" => \"value\", \"wrong_key\" => \"whatever\"}}, got 0"
+            "Expected 1 event with attributes %{data: %{\"key\" => \"value\", \"wrong_key\" => \"whatever\"}}, got 0"
         }
         |> ExUnit.AssertionError.message()
 
