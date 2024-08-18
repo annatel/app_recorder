@@ -13,7 +13,7 @@ defmodule AppRecorder.Migrations.V1 do
 
   defp create_sequences_table() do
     if AppRecorder.with_sequence?() do
-      create table(:app_recorder_sequences, primary: false) do
+      create table(:app_recorder_sequences) do
         add(:name, :string, null: false)
         add(:value, :bigint, null: false, default: 0)
       end
