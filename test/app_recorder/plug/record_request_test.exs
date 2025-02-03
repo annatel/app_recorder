@@ -1,6 +1,5 @@
 defmodule AppRecorder.Plug.RecordRequestTest do
-  use ExUnit.Case, async: true
-  use AppRecorder.DataCase
+  use AppRecorder.DataCase, async: true
 
   use Plug.Test
 

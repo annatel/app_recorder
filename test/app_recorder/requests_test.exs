@@ -1,6 +1,5 @@
 defmodule AppRecorder.RequestsTest do
-  use ExUnit.Case, async: true
-  use AppRecorder.DataCase
+  use AppRecorder.DataCase, async: true
 
   alias AppRecorder.Requests
   alias AppRecorder.Requests.Request

@@ -1,6 +1,5 @@
 defmodule AppRecorder.EventsTest do
-  use ExUnit.Case, async: true
-  use AppRecorder.DataCase
+  use AppRecorder.DataCase, async: true
 
   alias AppRecorder.TestRepo
 

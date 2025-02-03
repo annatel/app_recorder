@@ -1,6 +1,5 @@
 defmodule AppRecorder.SequencesTest do
-  use ExUnit.Case, async: false
-  use AppRecorder.DataCase
+  use AppRecorder.DataCase, async: false
 
   alias AppRecorder.Sequences
 
