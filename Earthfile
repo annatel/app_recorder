@@ -1,7 +1,7 @@
-VERSION 0.5
+VERSION 0.6
 
 elixir-base:
-    FROM elixir:1.12.2-alpine
+    FROM --platform=$BUILDPLATFORM elixir:1.14.3-alpine
     WORKDIR /app
     RUN apk add --no-progress --update openssh-client git build-base
     RUN mix local.rebar --force && mix local.hex --force
@@ -27,15 +27,15 @@ test:
     FROM earthly/dind:alpine
     WORKDIR /test
     RUN apk add --no-progress --update mysql-client postgresql-client
-    
+
     COPY --dir config lib priv test .
-    
+
     ARG PG_IMG="postgres:13.3"
-    ARG MYSQL_IMG="mysql:5.7"
+    ARG MYSQL_IMG="mysql:8.0"
 
     WITH DOCKER --pull "$PG_IMG" --pull "$MYSQL_IMG" --load elixir:latest=+deps --build-arg MIX_ENV="test"
         RUN timeout=$(expr $(date +%s) + 60); \
-        
+
             docker run --name pg --network=host -d -e POSTGRES_USER=postgres -e POSTGRES_PASSWORD=postgres -e POSTGRES_DB=app_recorder "$PG_IMG"; \
             docker run --name mysql --network=host -d -e MYSQL_ROOT_PASSWORD=root "$MYSQL_IMG"; \
 
@@ -65,7 +65,7 @@ test:
                 -w /app \
                 --name app_recorder_mysql \
                 elixir:latest mix test --cover; \
-            
+
             docker run \
                 --rm \
                 -e DATABASE_TEST_URL="ecto://postgres:postgres@127.0.0.1/app_recorder" \
